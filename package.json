@@ -6,10 +6,7 @@
     "dev": "node_modules/.bin/next dev",
     "build": "node_modules/.bin/next build",
     "start": "node_modules/.bin/next start",
-    "lint": "node_modules/.bin/eslint",
-    "db:migrate": "npx sequelize-cli db:migrate --config config/config.js",
-    "db:reset": "npx sequelize-cli db:migrate:undo:all --config config/config.js && npx sequelize-cli db:migrate --config config/config.js",
-    "db:test": "npx sequelize-cli db:migrate --config config/config.js --env test"
+    "lint": "node_modules/.bin/eslint"
   },
   "dependencies": {
     "mysql2": "^3.24.2",
