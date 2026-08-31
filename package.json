@@ -6,12 +6,17 @@
     "dev": "node_modules/.bin/next dev",
     "build": "node_modules/.bin/next build",
     "start": "node_modules/.bin/next start",
-    "lint": "node_modules/.bin/eslint"
+    "lint": "node_modules/.bin/eslint",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:reset": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate",
+    "db:test": "npx sequelize-cli db:migrate --env test"
   },
   "dependencies": {
     "next": "16.3.3",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -21,6 +26,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
+    "sequelize-cli": "^6.6.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
