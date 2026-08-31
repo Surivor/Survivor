@@ -1,7 +1,9 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -14,11 +16,11 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  async create(userData: Partial<User>): Promise<Partial<User>> {
+  async create(userData: CreateUserDto): Promise<Partial<User>> {
     const { name, email, password, firstname, status } = userData;
 
     if (!name || !email) {
-      throw new BadRequestException('name and email are required');
+      throw new BadRequestException('Name and email are required');
     }
 
     const newUser = this.usersRepository.create({
@@ -37,5 +39,17 @@ export class UsersService {
       email: newUser.email,
       status: newUser.status,
     };
+  }
+
+  async update(id: number, updateData: UpdateUserDto): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ id });
+    
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const updatedUser = this.usersRepository.merge(user, updateData);
+    
+    return await this.usersRepository.save(updatedUser);
   }
 }
