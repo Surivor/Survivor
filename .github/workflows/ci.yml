@@ -8,7 +8,7 @@ on:
 jobs:
   mirror:
     runs-on: ubuntu-latest
-    if: github.repository == 'Arthur-gtr/Survivor'
+    #if: github.repository == 'Arthur-gtr/Survivor'
     steps:
       - name: checkout git
         uses: actions/checkout@v6
