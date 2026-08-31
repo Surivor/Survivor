@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS users
     name       VARCHAR(255) NOT NULL,
     firstname  VARCHAR(255) NOT NULL DEFAULT '',
     status     VARCHAR(255) NOT NULL DEFAULT 'active',
+    role       ENUM('user', 'partenaire', 'admin') NOT NULL DEFAULT 'user',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
