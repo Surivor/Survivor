@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -27,10 +28,12 @@ export class UsersService {
       throw new BadRequestException('Name and email are required');
     }
 
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : '';
+
     const newUser = this.usersRepository.create({
       name: name.trim(),
       email: email.trim(),
-      password: password || '',
+      password: hashedPassword,
       firstname: firstname ? firstname.trim() : name.trim(),
       status: status || 'active',
     });
@@ -57,16 +60,6 @@ export class UsersService {
     const updatedUser = this.usersRepository.merge(user, updateData);
     
     return await this.usersRepository.save(updatedUser);
-  }
-
-  getPartners() {
-    return [
-      { id: 1, name: 'Greenwich Bakery', category: 'Bakery', address: '123 Baker St' },
-      { id: 2, name: 'Downtown Bistro', category: 'Restaurant', address: '45 Main St' },
-      { id: 3, name: 'Tech Hub Cafe', category: 'Cafe', address: '78 Silicon Ave' },
-      { id: 4, name: 'Central Sushi', category: 'Restaurant', address: '12 Sushi Blvd' },
-      { id: 5, name: 'Urban Salads', category: 'Healthy Food', address: '99 Green Way' }
-    ];
   }
 }
 
