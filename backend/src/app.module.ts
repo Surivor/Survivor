@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -13,12 +14,13 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: process.env.DB_HOST || 'db',
       port: 3306,
       username: 'root',
       password: 'root',
       database: 'survivor',
       entities: [User],
+      autoLoadEntities: true,
       synchronize: true,
     }),
     UsersModule,
@@ -30,6 +32,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       serviceId: 'project',
     }),
     AuthModule,
+    TransactionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
