@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { Transaction } from './entities/transaction.entity';
-
-
 
 @Injectable()
 export class TransactionsService {
   constructor(
     @InjectRepository(Transaction)
     private transactionRepo: Repository<Transaction>,
+    private jwtService: JwtService,
   ) {}
   
   getBalance() {
@@ -24,8 +24,10 @@ export class TransactionsService {
     ];
   }
 
-  getQrCode() {
-    return { code: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30' };
+  getQrCode(userId: number) {
+    const payload = { sub: userId, purpose: 'payment_qrcode' };
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
+    return { code: token };
   }
 
   async create(userId: number, amount: number, partnerId: number) {

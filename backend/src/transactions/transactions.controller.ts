@@ -4,7 +4,7 @@ import { TransactionsService } from './transactions.service';
 import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt'))
-@Controller('api/transactions') 
+@Controller('api/transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
@@ -19,8 +19,9 @@ export class TransactionsController {
   }
 
   @Get('qrcode')
-  getQrCode() {
-    return this.transactionsService.getQrCode();
+  getQrCode(@Req() req: Request) {
+    const userId = (req as any).user.userId;
+    return this.transactionsService.getQrCode(userId);
   }
 
   @Post('transactions')
