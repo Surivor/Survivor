@@ -1,17 +1,41 @@
 services:
+  db:
+    image: mysql:8.0
+    container_name: survivor-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: survivor
+      MYSQL_USER: survivor
+      MYSQL_PASSWORD: survivor
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: survivor-app
+    depends_on:
+      - db
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: development
       PORT: 3000
       WATCHPACK_POLLING: "true"
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: survivor
+      DB_USER: survivor
+      DB_PASSWORD: survivor
     volumes:
       - .:/app
       - /app/node_modules
     command: npm run dev
     restart: unless-stopped
+
+volumes:
+  mysql_data:
