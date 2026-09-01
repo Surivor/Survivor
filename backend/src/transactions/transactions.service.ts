@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -14,6 +14,35 @@ export class TransactionsService {
   
   getBalance() {
     return { balance: 150.00 };
+  }
+
+  async processPayment(qrCodeToken: string, amount: number, partnerId: number) {
+    let payload;
+    try {
+      payload = this.jwtService.verify(qrCodeToken);
+    } catch (error) {
+      throw new UnauthorizedException('invalid QR Code');
+    }
+
+    if (payload.purpose !== 'payment_qrcode') {
+      throw new BadRequestException('this QR code can\'t be used to share money');
+    }
+
+    const userId = payload.sub;
+
+    const newTransaction = this.transactionRepo.create({
+      userId: userId,
+      amount: amount,
+      partnerId: partnerId,
+    });
+
+    await this.transactionRepo.save(newTransaction);
+
+    return {
+      success: true,
+      message: `Transaction: ${amount}`,
+      transaction: newTransaction
+    };
   }
 
   getHistory() {

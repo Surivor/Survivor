@@ -25,8 +25,12 @@ export class TransactionsController {
   }
 
   @Post('transactions')
-  createTransaction(@Req() req: Request, @Body() body: { amount: number, partnerId: number }) {
-    const userId = (req as any).user.userId;
-    return this.transactionsService.create(userId, body.amount, body.partnerId);
+  createTransaction(
+    @Req() req: Request, 
+    @Body() body: { amount: number, qrCodeToken: string }
+  ) {
+    const partnerId = (req as any).user.userId;
+    return this.transactionsService.processPayment(body.qrCodeToken, body.amount, partnerId);
   }
+  
 }
