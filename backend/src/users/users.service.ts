@@ -56,4 +56,15 @@ export class UsersService {
     
     return await this.usersRepository.save(updatedUser);
   }
+
+  getPartners() {
+    return [
+      { id: 1, name: 'Greenwich Bakery', category: 'Bakery', address: '123 Baker St' },
+      { id: 2, name: 'Downtown Bistro', category: 'Restaurant', address: '45 Main St' },
+      { id: 3, name: 'Tech Hub Cafe', category: 'Cafe', address: '78 Silicon Ave' },
+      { id: 4, name: 'Central Sushi', category: 'Restaurant', address: '12 Sushi Blvd' },
+      { id: 5, name: 'Urban Salads', category: 'Healthy Food', address: '99 Green Way' }
+    ];
+  }
 }
+
