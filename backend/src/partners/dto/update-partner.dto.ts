@@ -5,8 +5,8 @@ import { UpdateUserDto } from "../../users/dto/update-user.dto";
 export class UpdatePartnerDto {
     userdto: UpdateUserDto;
 
-    @IsString
-    @IsNotEmpty({ meassage: "Object Social Required" })
+    @IsString()
+    @IsNotEmpty({ message: 'Object Social Required' })
     objet_social: string;
 }
 

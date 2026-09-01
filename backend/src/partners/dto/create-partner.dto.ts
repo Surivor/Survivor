@@ -8,8 +8,8 @@ export class CreatePartnerDto {
     @IsNotEmpty({ message: "SIREN Required" })
     siren: number;
 
-    @IsString
-    @IsNotEmpty({ meassage: "Object Social Required" })
+    @IsString()
+    @IsNotEmpty({ message: "Object Social Required" })
     objet_social: string;
 }
 

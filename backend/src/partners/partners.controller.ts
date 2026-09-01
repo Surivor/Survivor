@@ -22,9 +22,9 @@ export class PartnersController {
     return this.partnersService.create(partnerData);
   }
 
-  /*@Patch(':id')
+  @Patch(':id')
   update(@Param('id') id: string, @Body() updateData: UpdatePartnerDto) {
     return this.partnersService.update(+id, updateData);
-  }*/
+  }
 }
 

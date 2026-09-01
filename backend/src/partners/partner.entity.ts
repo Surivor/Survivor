@@ -1,4 +1,4 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
 import { User } from '../users/user.entity';
 
 @Entity('partners')
@@ -12,7 +12,8 @@ export class Partner {
    @Column({ default: '' })
    objet_social: string;
 
-   @joinColumn({ name: 'id' }) //map primary key as foreign key
+   @OneToOne(() => User)
+   @JoinColumn({ name: 'id' })
    user: User;
 }
 

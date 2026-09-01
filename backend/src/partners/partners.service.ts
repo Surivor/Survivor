@@ -29,6 +29,7 @@ export class PartnersService {
 	return this.partnersRepository.findOneBy({ siren });
     }
 
+    /** create a user & partner entry in the db */
     async create(partnerData: CreatePartnerDto): Promise<Partial<Partner>> {
 
 	if (!partnerData.siren || !partnerData.objet_social) {
@@ -46,10 +47,25 @@ export class PartnersService {
 	    objet_social: partnerData.objet_social,
 	})
 
+	await this.partnersRepository.save(newPartner)
+
 	return {
 	    siren: newPartner.siren,
 	    objet_social: newPartner.objet_social,
 	};
+    }
+
+    /** update a user & partner entry in the db */
+    async update(id: number, updateData: UpdatePartnerDto): Promise<Partner> {
+	const partner = await this.partnersRepository.findOneBy({ id });
+
+	if (!partner) {
+	    throw new NotFoundException(`Partner with ID ${id} not found`);
+	}
+
+	const updatedUser = this.partnersRepository.merge(partner, updateData);
+
+	return await this.partnersRepository.save(updatedUser);
     }
 }
 
