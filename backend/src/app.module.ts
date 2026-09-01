@@ -14,12 +14,13 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: process.env.DB_HOST || 'db',
       port: 3306,
       username: 'root',
       password: 'root',
       database: 'survivor',
       entities: [User],
+      autoLoadEntities: true,
       synchronize: true,
     }),
     UsersModule,
