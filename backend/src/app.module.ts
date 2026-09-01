@@ -20,6 +20,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       password: 'root',
       database: 'survivor',
       entities: [User],
+      autoLoadEntities: true,
       synchronize: true,
     }),
     UsersModule,
