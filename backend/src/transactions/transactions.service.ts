@@ -1,7 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Transaction } from './entities/transaction.entity';
+
+
 
 @Injectable()
 export class TransactionsService {
+  constructor(
+    @InjectRepository(Transaction)
+    private transactionRepo: Repository<Transaction>,
+  ) {}
   
   getBalance() {
     return { balance: 150.00 };
@@ -18,4 +27,21 @@ export class TransactionsService {
   getQrCode() {
     return { code: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30' };
   }
+
+  async create(userId: number, amount: number, partnerId: number) {
+    const newTransaction = this.transactionRepo.create({
+      userId: userId,
+      amount: amount,
+      partnerId: partnerId,
+    });
+
+    await this.transactionRepo.save(newTransaction);
+
+    return {
+      success: true,
+      message:  `Transaction ${amount} stored`,
+      data: newTransaction
+    };
+  }
 }
+
