@@ -12,9 +12,9 @@ export class PartnersController {
     return this.partnersService.findAll();
   }
 
-  @Get('siren')
-  find(@Body() siren: number) {
-      return this.partnersService.findBySiren(siren);
+  @Get('siren/:siren')
+  find(@Param('siren') siren: number) {
+    return this.partnersService.findBySiren(siren);
   }
 
   @Post()
