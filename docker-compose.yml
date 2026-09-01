@@ -15,7 +15,7 @@ services:
 
   app:
     build:
-      context: .
+      context: ./front
       dockerfile: Dockerfile
     container_name: survivor-app
     depends_on:
@@ -32,7 +32,7 @@ services:
       DB_USER: survivor
       DB_PASSWORD: survivor
     volumes:
-      - .:/app
+      - ./front:/app
       - /app/node_modules
     command: npm run dev
     restart: unless-stopped
