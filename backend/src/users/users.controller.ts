@@ -12,11 +12,6 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get('partners')
-  getPartners() {
-    return this.usersService.getPartners();
-  }
-
   @Post()
   create(@Body() userData: CreateUserDto) {
     return this.usersService.create(userData);

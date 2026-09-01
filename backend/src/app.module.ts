@@ -5,8 +5,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
+import { Partner } from './partners/partner.entity';
 import { AuthModule } from './auth/auth.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { PartnersModule } from './partners/partners.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -19,7 +21,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       username: 'root',
       password: 'root',
       database: 'survivor',
-      entities: [User],
+      entities: [User, Partner],
       autoLoadEntities: true,
       synchronize: true,
     }),
@@ -33,6 +35,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     }),
     AuthModule,
     TransactionsModule,
+    PartnersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
