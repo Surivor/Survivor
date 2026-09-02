@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 @ApiTags('Users')
 @Controller('api/users')
 export class UsersController {
@@ -30,5 +30,19 @@ export class UsersController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateData: UpdateUserDto) {
     return this.usersService.update(+id, updateData);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Get the profile of a user' })
+  @ApiResponse({
+    status: 200,
+    description: 'User information',
+    schema: { example: { name: 'Dupont', firstname: 'Jean', address: '12 rue de la Paix', status: 'active' } }
+  })
+  @Get('me')
+  async getProfile(@Req() req: Request) {
+    const userId = (req as any).user.sub;
+    return this.usersService.getProfileInfo(userId);
   }
 }
