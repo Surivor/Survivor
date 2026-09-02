@@ -43,3 +43,7 @@ next-env.d.ts
 # sqlite
 database.sqlite
 database.test.sqlite
+
+#postamn variable
+.postman
+postman

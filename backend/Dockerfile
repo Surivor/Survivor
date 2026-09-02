@@ -1,13 +1,14 @@
 FROM node:20-alpine
 
+RUN apk update && apk add iputils
+
 WORKDIR /app
 
 COPY package*.json ./
-
 RUN npm install
 
 COPY . .
 
-EXPOSE 3001
+EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start:dev"]

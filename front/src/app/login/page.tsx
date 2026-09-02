@@ -28,12 +28,12 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-4 rounded-2xl text-zinc-900"
+        className="w-full max-w-sm space-y-4 rounded-2xl"
       >
-        <h1 className="text-center text-2xl font-bold text-zinc-900">
+        <h1 className="text-center text-2xl font-bold font-title text-primary">
           CartePro
         </h1>
-        <p className="text-center text-sm text-zinc-900">
+        <p className="text-center text-sm text-primary">
           Connectez-vous à votre espace
         </p>
 
@@ -55,7 +55,7 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+          className="w-full rounded-lg bg-action py-2 text-sm font-semibold text-white transition-colors hover:bg-action/90"
         >
           Se connecter
         </button>

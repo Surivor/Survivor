@@ -10,18 +10,22 @@ services:
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3306:3306"
+    networks:
+      - survivor
     volumes:
       - mysql_data:/var/lib/mysql
 
-  app:
+  backend:
     build:
-      context: ./front
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: survivor-app
+    container_name: survivor-backend
     depends_on:
       - db
     ports:
       - "3000:3000"
+    networks:
+      - survivor
     environment:
       NODE_ENV: development
       PORT: 3000
@@ -32,6 +36,25 @@ services:
       DB_USER: survivor
       DB_PASSWORD: survivor
     volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run start:dev
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: survivor-frontend
+    ports:
+      - "3001:3001"
+    networks:
+      - survivor
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      WATCHPACK_POLLING: "true"
+    volumes:
       - ./front:/app
       - /app/node_modules
     command: npm run dev
@@ -39,3 +62,6 @@ services:
 
 volumes:
   mysql_data:
+
+networks:
+  survivor:
