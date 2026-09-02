@@ -11,20 +11,22 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody } from '@nes
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+
   @ApiOperation({ summary: 'Retrieve employee balance' })
   @ApiResponse({ status: 200, description: 'Returns the current available balance for the authenticated employee.' })
   @Get('balance')
-  getBalance() {
-    return this.transactionsService.getBalance();
+  getBalance(@Req() req: Request) {
+    const userId = (req as any).user.userId;
+    return this.transactionsService.getBalance(userId);
   }
 
   @ApiOperation({ summary: 'Retrieve transaction history' })
-  @ApiResponse({ status: 200, description: 'Returns an array of past transactions (credits and debits).' })
+  @ApiResponse({ status: 200, description: 'Returns an array of past transactions.' })
   @Get('history')
-  getHistory() {
-    return this.transactionsService.getHistory();
+  getHistory(@Req() req: Request) {
+    const userId = (req as any).user.userId;
+    return this.transactionsService.getHistory(userId);
   }
-
   @ApiOperation({ summary: 'Generate temporary QR Code token' })
   @ApiResponse({ status: 200, description: 'Returns a 30-minute valid JWT meant to be scanned by a partner.' })
   @ApiResponse({ status: 401, description: 'Unauthorized if the employee session token is missing or invalid.' })

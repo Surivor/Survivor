@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -9,9 +8,7 @@ import { Partner } from './partners/partner.entity';
 import { AuthModule } from './auth/auth.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { PartnersModule } from './partners/partners.module';
-
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
-
+import { HealthController } from './health/health.controller';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -28,16 +25,11 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     UsersModule,
     // Distributed tracing, auto-correlated logs, request/job metrics, error
     // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
-    ObserveModule.forRoot({
-      appKey: 'YOUR_APP_KEY',
-      appSecret: 'YOUR_APP_SECRET',
-      serviceId: 'project',
-    }),
     AuthModule,
     TransactionsModule,
     PartnersModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
