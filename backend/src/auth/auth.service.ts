@@ -16,10 +16,8 @@ export class AuthService {
     if (!userData.password) {
       throw new BadRequestException('No password');
     }
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(userData.password, salt);
 
-    const newUser = { ...userData, password: hashedPassword };
+    const newUser = { ...userData, password: userData.password };
     return this.usersService.create(newUser);
   }
 

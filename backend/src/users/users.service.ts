@@ -47,13 +47,13 @@ export class UsersService {
     await this.usersRepository.save(newUser);
 
     return newUser;
-    return {
-      name: newUser.name,
-      firstname: newUser.firstname,
-      email: newUser.email,
-      status: newUser.status,
-      id: newUser.id,
-    };    
+    //return {
+    //  name: newUser.name,
+    //  firstname: newUser.firstname,
+    //  email: newUser.email,
+    //  status: newUser.status,
+    //  id: newUser.id,
+    //};
   }
 
   async update(id: number, updateData: UpdateUserDto): Promise<User> {
@@ -66,6 +66,24 @@ export class UsersService {
     const updatedUser = this.usersRepository.merge(user, updateData);
     
     return await this.usersRepository.save(updatedUser);
+  }
+
+  async getProfileInfo(id: number) {
+    const user = await this.usersRepository.findOne({
+      where: { id: id },
+      select: {
+        name: true,
+        firstname: true,
+        email: true,
+        status: true,
+      }
+    });
+
+    if (!user) {
+      throw new NotFoundException('User undefined');
+    }
+
+    return user;
   }
 }
 
