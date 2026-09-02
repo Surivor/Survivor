@@ -8,7 +8,7 @@ import { Partner } from './partners/partner.entity';
 import { AuthModule } from './auth/auth.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { PartnersModule } from './partners/partners.module';
-
+import { HealthController } from './health/health.controller';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -29,7 +29,7 @@ import { PartnersModule } from './partners/partners.module';
     TransactionsModule,
     PartnersModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
