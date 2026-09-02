@@ -1,8 +1,7 @@
+import type { Metadata } from 'next';
 import localFont from "next/font/local";
 import { Spectral } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import StateBrand from "@/components/StateBrand";
 
 const marianne = localFont({
   src: [
@@ -20,12 +19,17 @@ const spectral = Spectral({
   display: "swap",
 });
 
+export const metadata: Metadata = {
+  title: 'Ticket Tout',
+  description: 'Gérez vos avantages collaborateurs simplement.',
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr"
+    <html lang="fr" suppressHydrationWarning
       className={`${marianne.variable} ${spectral.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <StateBrand />
+      <body className="min-h-full flex flex-col bg-zinc-50 font-spectral">
+        {}
         {children}
      </body>
     </html>
