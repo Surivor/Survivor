@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getToken, removeToken } from "@/lib/auth";
 import BalanceCard from "@/components/BalanceCard";
+import Header from "@/components/Header";
 
 type UserProfile = {
   id: number;
@@ -13,10 +14,16 @@ type UserProfile = {
   status: string;
 };
 
+type BalanceState = {
+  available: number;
+  used: number;
+  limit: number;
+};
+
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [balance, setBalance] = useState<number | null>(null);
+  const [balance, setBalance] = useState<BalanceState>({ available: 0, used: 0, limit: 300 });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -32,6 +39,11 @@ export default function ProfilePage() {
       try {
         const headers = { Authorization: `Bearer ${token}` };
 
+        const safeJson = async (res: Response) => {
+          const text = await res.text();
+          return text ? JSON.parse(text) : null;
+        };
+
         const [meRes, balanceRes] = await Promise.all([
           fetch("http://localhost:3000/api/users/me", { headers }),
           fetch("http://localhost:3000/api/transactions/balance", { headers }),
@@ -43,15 +55,23 @@ export default function ProfilePage() {
           return;
         }
 
-        if (!meRes.ok || !balanceRes.ok) {
+        if (!meRes.ok) {
           throw new Error("Impossible de charger le profil");
         }
 
-        const meData = await meRes.json();
-        const balanceData = await balanceRes.json();
+        const meData = await safeJson(meRes);
+        if (meData) setUser(meData);
 
-        setUser(meData);
-        setBalance(balanceData.balance);
+        if (balanceRes.ok) {
+          const bData = await safeJson(balanceRes);
+          if (bData) {
+            setBalance({
+              available: bData.balance || 0,
+              used: 300 - (bData.balance || 0),
+              limit: 300
+            });
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
@@ -79,18 +99,23 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center gap-8 bg-zinc-50 px-4 pt-8">
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-7 shadow-md">
-        <h1 className="text-2xl font-bold font-title text-primary mb-4">Mon profil</h1>
+    <>
+      <Header />
+      <div className="flex min-h-screen flex-col items-center gap-8 bg-zinc-50 px-4 pt-8">
+        <div className="w-full max-w-2xl rounded-2xl bg-white p-7 shadow-md space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold font-title text-primary mb-4">Mon profil</h1>
 
-        <div className="space-y-2 text-sm text-zinc-900">
-          <p><span className="font-semibold">Nom :</span> {user.name}</p>
-          <p><span className="font-semibold">Prénom :</span> {user.firstname}</p>
-          <p><span className="font-semibold">Email :</span> {user.email}</p>
+            <div className="space-y-2 text-sm text-zinc-900">
+              <p><span className="font-semibold">Nom :</span> {user.name}</p>
+              <p><span className="font-semibold">Prénom :</span> {user.firstname}</p>
+              <p><span className="font-semibold">Email :</span> {user.email}</p>
+            </div>
+          </div>
+
+          <BalanceCard balance={balance.available} used={balance.used} limit={balance.limit} />
         </div>
       </div>
-
-      {balance !== null && <BalanceCard/>}
-    </div>
+    </>
   );
 }
