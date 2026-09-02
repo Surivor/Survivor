@@ -1,11 +1,20 @@
-import Link from "next/link";
+import Partener_main from "@/components/Partener_main";
 
-import { FormEvent } from 'react'
+async function GetParteners() {
+    const result = await fetch("http://backend:3000/api/partners", {
+        cache: "no-cache"
+    });
+    if (!result.ok)
+        throw new Error("Failed to fetch partners");
+    return result.json();
+}
 
-export default function mainPage() {
+export default async function mainPage() {
+    const partners = await GetParteners();
+
     return (
         <div className="flex min-h-screen flex-col items-center gap-8 bg-zinc-50 px-4">
-            <h1 className="font-bold text-zinc-900">partner</h1>
+            <Partener_main partners={partners} />
         </div>
     );
 }
