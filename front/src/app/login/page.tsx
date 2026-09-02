@@ -31,7 +31,7 @@ export default function LoginPage() {
         className="w-full max-w-sm space-y-4 rounded-2xl"
       >
         <h1 className="text-center text-2xl font-bold font-title text-primary">
-          CartePro
+          Ticket Tout
         </h1>
         <p className="text-center text-sm text-primary">
           Connectez-vous à votre espace
