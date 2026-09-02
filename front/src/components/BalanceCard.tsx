@@ -5,7 +5,7 @@ export default function BalanceCard() {
   const percentage = (used / limit) * 100;
 
   return (
-    <div className="w-full max-w-2xl rounded-2xl bg-blue-600 p-7 text-white">
+    <div className="w-full max-w-2xl rounded-2xl bg-primary p-7 text-white">
       <p className="text-sm opacity-90 mb-2">Solde disponible</p>
       <h2 className="text-5xl font-bold mb-6">{balance.toFixed(2)}</h2>
       
@@ -14,9 +14,9 @@ export default function BalanceCard() {
         
         {/* Progress bar */}
         <div className="flex items-center gap-3">
-          <div className="flex-1 bg-blue-500 rounded-full h-2 overflow-hidden">
+          <div className="flex-1 bg-white/30 rounded-full h-2 overflow-hidden">
             <div 
-              className="bg-blue-300 h-full transition-all"
+              className="bg-white h-full transition-all"
               style={{ width: `${percentage}%` }}
             ></div>
           </div>

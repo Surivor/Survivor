@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getToken, removeToken } from "@/lib/auth";
 import BalanceCard from "@/components/BalanceCard";
+import Header from "@/components/Header";
 
 type UserProfile = {
   id: number;
@@ -79,6 +80,8 @@ export default function ProfilePage() {
   }
 
   return (
+    <>
+    <Header />
     <div className="flex min-h-screen flex-col items-center gap-8 bg-zinc-50 px-4 pt-8">
       <div className="w-full max-w-2xl rounded-2xl bg-white p-7 shadow-md">
         <h1 className="text-2xl font-bold font-title text-primary mb-4">Mon profil</h1>
@@ -92,5 +95,6 @@ export default function ProfilePage() {
 
       {balance !== null && <BalanceCard/>}
     </div>
+    </>
   );
 }

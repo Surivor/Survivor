@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import { Spectral } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
+import StateBrand from "@/components/StateBrand";
 
 const marianne = localFont({
   src: [
@@ -24,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr"
       className={`${marianne.variable} ${spectral.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <Header />
+        <StateBrand />
         {children}
      </body>
     </html>
