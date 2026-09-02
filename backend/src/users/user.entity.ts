@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne } from 'typeorm';
+import { Partner } from '../partners/partner.entity';
 
 @Entity('users')
 export class User {
@@ -22,4 +23,7 @@ export class User {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @OneToOne(() => Partner, (partner) => partner.user)
+  partner: Partner;
 }

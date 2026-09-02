@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
 import { TransactionsService } from './transactions.service';
 import { TransactionsController } from './transactions.controller';
 import { PassportModule } from '@nestjs/passport';
@@ -8,7 +9,10 @@ import { Transaction } from './entities/transaction.entity';
 @Module({
   imports: [
     PassportModule,
-    TypeOrmModule.forFeature([Transaction])
+    TypeOrmModule.forFeature([Transaction]),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'ANOTHER_SECRET_FOR_SHARE_MONEY!!!', 
+    }),
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService],
