@@ -1,27 +1,29 @@
-import Link from 'next/link'
+import Link from 'next/link';
 
-const transactions = [
-    { name: "Boulangerie du Marché", date: "1 sept. 2026", amount: "-8,50 €" },
-    { name: "Restaurant Le Bistrot", date: "30 août 2026", amount: "-14,20 €" },
-    { name: "Pharmacie Centrale", date: "29 août 2026", amount: "-22,00 €" },
-    { name: "Librairie Pages & Co", date: "28 août 2026", amount: "-18,90 €" },
-]
+type Transaction = {
+    name?: string;
+    date?: string; 
+    amount?: string | number;
+};
 
-export default function HistoryMain() {
+export default function HistoryMain({ transactions = [] }: { transactions: Transaction[] }) {
     return (
-        <div className={"w-full rounded-[28px] bg-white border border-gray-100 shadow-sm p-6"}>
+        <div className="w-full rounded-[28px] bg-white border border-gray-100 shadow-sm p-6">
             <div className="flex items-center justify-between mb-2">
-                <h2 className="text-black font-bold text-xl">Dernières transactions</h2>
-                <Link href="/history" className="text-blue-600 text-sm font-medium hover:underline">
+                <h2 className="text-black font-bold font-title text-xl">Dernières transactions</h2>
+                <Link href="/history" className="text-action text-sm font-medium hover:underline">
                     Voir tout
                 </Link>
             </div>
 
             <div className="divide-y divide-gray-100">
-                {transactions.map((t) => (
-                    <div key={t.name} className="flex items-center justify-between py-4">
+                {transactions.length === 0 && (
+                    <p className="text-gray-400 text-sm py-4">Aucune transaction.</p>
+                )}
+                {transactions.map((t, index) => (
+                    <div key={index} className="flex items-center justify-between py-4">
                         <div>
-                            <p className="text-black font-semibold">{t.name}</p>
+                            <p className="text-black font-semibold">{t.name || 'Paiement'}</p>
                             <p className="text-gray-400 text-sm">{t.date}</p>
                         </div>
                         <span className="text-red-500 font-semibold">{t.amount}</span>
