@@ -12,13 +12,15 @@ export default function LoginPage() {
     const email = formData.get('email')
     const password = formData.get('password')
 
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch('http://localhost:3000/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     })
 
     if (response.ok) {
+      const data = await response.json()
+      localStorage.setItem('Ticket_tout_token', data.access_token)
       router.push('/profile')
     } else {
     }
@@ -31,7 +33,7 @@ export default function LoginPage() {
         className="w-full max-w-sm space-y-4 rounded-2xl"
       >
         <h1 className="text-center text-2xl font-bold font-title text-primary">
-          CartePro
+          Ticket Tout
         </h1>
         <p className="text-center text-sm text-primary">
           Connectez-vous à votre espace
