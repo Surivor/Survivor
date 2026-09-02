@@ -33,7 +33,7 @@ export default function ProfilePage() {
         const headers = { Authorization: `Bearer ${token}` };
 
         const [meRes, balanceRes] = await Promise.all([
-          fetch("http://localhost:3000/auth/me", { headers }),
+          fetch("http://localhost:3000/api/users/me", { headers }),
           fetch("http://localhost:3000/api/transactions/balance", { headers }),
         ]);
 
