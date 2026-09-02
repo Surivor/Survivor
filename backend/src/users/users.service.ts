@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ConflictException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -33,6 +33,11 @@ export class UsersService {
     if (!name || !email) {
       throw new BadRequestException('Name and email are required');
     }
+
+    const existingUser = await this.findByEmail(email.trim());
+      if (existingUser) {
+      throw new ConflictException(`L'adresse email ${email} est déjà utilisée.`);
+  }
 
     const hashedPassword = password ? await bcrypt.hash(password, 10) : '';
 
