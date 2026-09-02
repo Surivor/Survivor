@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -40,9 +40,20 @@ export class UsersController {
     description: 'User information',
     schema: { example: { name: 'Dupont', firstname: 'Jean', address: '12 rue de la Paix', status: 'active' } }
   })
+
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Get('me')
   async getProfile(@Req() req: Request) {
-    const userId = (req as any).user.sub;
+    const userPayload = (req as any).user;
+    
+    const userId = userPayload?.sub || userPayload?.userId || userPayload?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException('Can\'t load id');
+    }
+
     return this.usersService.getProfileInfo(userId);
   }
 }

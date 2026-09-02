@@ -47,13 +47,13 @@ export class UsersService {
     await this.usersRepository.save(newUser);
 
     return newUser;
-    return {
-      name: newUser.name,
-      firstname: newUser.firstname,
-      email: newUser.email,
-      status: newUser.status,
-      id: newUser.id,
-    };
+    //return {
+    //  name: newUser.name,
+    //  firstname: newUser.firstname,
+    //  email: newUser.email,
+    //  status: newUser.status,
+    //  id: newUser.id,
+    //};
   }
 
   async update(id: number, updateData: UpdateUserDto): Promise<User> {
