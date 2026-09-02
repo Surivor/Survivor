@@ -31,6 +31,6 @@
     "**/*.mts"
   ],
   "exclude": [
-    "cartepro/node_modules"
+    "CartePro/node_modules"
   ]
 }
