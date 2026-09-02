@@ -5,8 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 // User
 import { User } from '../users/user.entity';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { UsersService } from '../users/users.service';
 // Partner
 import { Partner } from './partner.entity';
@@ -45,6 +43,8 @@ export class PartnersService {
 	    id: newUser.id,
 	    siren: partnerData.siren,
 	    objet_social: partnerData.objet_social,
+	    
+	
 	})
 
 	await this.partnersRepository.save(newPartner)
