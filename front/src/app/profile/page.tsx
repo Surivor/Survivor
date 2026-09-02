@@ -90,10 +90,11 @@ export default function ProfilePage() {
           <p><span className="font-semibold">Nom :</span> {user.name}</p>
           <p><span className="font-semibold">Prénom :</span> {user.firstname}</p>
           <p><span className="font-semibold">Email :</span> {user.email}</p>
+          <p><span className="font-semibold"><br/></span></p>
         </div>
+      <BalanceCard/>
       </div>
 
-      {balance !== null && <BalanceCard/>}
     </div>
     </>
   );
