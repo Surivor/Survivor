@@ -12,9 +12,7 @@ export class TransactionsService {
     private jwtService: JwtService,
   ) {}
   
-  getBalance() {
-    return { balance: 150.00 };
-  }
+  
 
   async processPayment(qrCodeToken: string, amount: number, partnerId: number) {
     let payload;
@@ -45,12 +43,22 @@ export class TransactionsService {
     };
   }
 
-  getHistory() {
-    return [
-      { id: 1, date: '2026-09-01T12:30:00Z', amount: -15.50, partnerName: 'Boulangerie Paul', type: 'debit' },
-      { id: 2, date: '2026-08-31T19:00:00Z', amount: -32.00, partnerName: 'Bistrot du Coin', type: 'debit' },
-      { id: 3, date: '2026-08-25T08:00:00Z', amount: 200.00, partnerName: 'Recharge Employeur', type: 'credit' }
-    ];
+  async getBalance(userId: number) {
+    const result = await this.transactionRepo
+      .createQueryBuilder("transaction")
+      .select("SUM(transaction.amount)", "total")
+      .where("transaction.userId = :userId", { userId: userId })
+      .getRawOne();
+
+    const currentBalance = result.total ? parseFloat(result.total) : 0;
+
+    return { balance: currentBalance };
+  }
+
+  async getHistory(userId: number) {
+    return await this.transactionRepo.find({
+      where: { userId: userId }
+    });
   }
 
   getQrCode(userId: number) {
