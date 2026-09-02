@@ -1,4 +1,5 @@
 "use client";
+import SimulationBanner from "./SimulationBanner";
 
 import { useState } from "react";
 import { getToken } from "@/lib/auth";
@@ -80,6 +81,7 @@ export default function QrCodeCard() {
           </div>
         </div>
       )}
+      <SimulationBanner />
     </>
   );
 }
