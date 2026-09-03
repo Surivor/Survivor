@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -41,4 +41,13 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   status?: string;
+
+  @ApiPropertyOptional({
+      example: '123456789',
+      description: "SIREN of the enterprise the user works in, input 0 if he is unemployed"
+  })
+  @IsNumber()
+  @IsOptional()
+  siren_entreprise?: number;
+
 }

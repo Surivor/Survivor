@@ -5,8 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 // User
 import { User } from '../users/user.entity';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { UsersService } from '../users/users.service';
 // Partner
 import { Partner } from './partner.entity';
@@ -29,6 +27,19 @@ export class PartnersService {
 	return this.partnersRepository.findOneBy({ siren });
     }
 
+    async getFeatured(): Promise<Partner[]> {
+	return this.partnersRepository.find({
+	    where: { featured: true }
+	})
+    }
+
+    async getVerified(): Promise<Partner[]> {
+	return this.partnersRepository.find({
+	    where: { verified: true }
+	})
+    }
+
+
     /** create a user & partner entry in the db */
     async create(partnerData: CreatePartnerDto): Promise<Partial<Partner>> {
 
@@ -45,14 +56,13 @@ export class PartnersService {
 	    id: newUser.id,
 	    siren: partnerData.siren,
 	    objet_social: partnerData.objet_social,
+	    verified: partnerData.verified,
+	    featured: partnerData.featured,
 	})
 
 	await this.partnersRepository.save(newPartner)
 
-	return {
-	    siren: newPartner.siren,
-	    objet_social: newPartner.objet_social,
-	};
+	return newPartner;
     }
 
     /** update a user & partner entry in the db */

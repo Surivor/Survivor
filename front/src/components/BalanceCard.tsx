@@ -17,7 +17,7 @@ export default function BalanceCard({ balance, used, limit }: BalanceCardProps) 
 
   return (
     <>
-      <div className="w-full rounded-[28px] bg-action p-6 text-white shadow-md sm:p-8">
+      <div className="w-full rounded-[28px] bg-primary p-6 text-white shadow-md sm:p-8">
         <p className="mb-3 text-[16px] font-normal text-white/90">Solde disponible</p>
         <h2 className="mb-8 text-[3.4rem] font-bold font-title">
           {formatEuro(balance).replace(" €", " €")}

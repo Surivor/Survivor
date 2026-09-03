@@ -1,0 +1,37 @@
+name: Build an Artefact Docker Compose
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-pack:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: "Step 1: transfer the repo file to the new image"
+      uses: actions/checkout@v4
+
+    - name: "Step 2: setup DockerBuildX"
+      uses: docker/setup-buildx-action@v3
+
+    - name: "Step 3: build and rename the dockers image"
+      run: |
+        docker build -t survivor-backend:latest ./backend
+        docker build -t survivor-frontend:latest ./front
+
+    - name: "Step 4: builds docker image and save it"
+      run: |
+        mkdir -p docker-archives
+        docker save -o docker-archives/backend.tar survivor-backend:latest
+        docker save -o docker-archives/frontend.tar survivor-frontend:latest
+        cp docker-compose.yml docker-archives/
+
+    - name: "Step 5: send the artefact to github"
+      uses: actions/upload-artifact@v4
+      with:
+        name: survivor-docker-images
+        path: docker-archives/
+        retention-days: 7

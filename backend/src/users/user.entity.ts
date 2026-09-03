@@ -21,6 +21,11 @@ export class User {
   @Column({ default: 'active' })
   status: string;
 
+  //siren de l'entreprise dans lequelle le user travaille
+  //optionnel
+  @Column({ default: 0 })
+  siren_entreprise: number;
+
   @CreateDateColumn()
   created_at: Date;
 

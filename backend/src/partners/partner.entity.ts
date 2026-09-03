@@ -3,17 +3,25 @@ import { User } from '../users/user.entity';
 
 @Entity('partners')
 export class Partner {
-   @PrimaryColumn()
-   id: number;
+    @PrimaryColumn()
+    id: number;
 
-   @Column({ unique: true })
-   siren: number;
+    @Column({ unique: true })
+    siren: number;
 
-   @Column({ default: '' })
-   objet_social: string;
+    @Column({ default: '' })
+    objet_social: string;
 
-   @OneToOne(() => User)
-   @JoinColumn({ name: 'id' })
-   user: User;
+    //pastille du gouv
+    @Column({ default: false })
+    verified: boolean
+
+    //government favorites (featured on main page)
+    @Column({ default: false })
+    featured: boolean
+
+    @OneToOne(() => User)
+    @JoinColumn({ name: 'id' })
+    user: User;
 }
 
