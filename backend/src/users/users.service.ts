@@ -28,7 +28,7 @@ export class UsersService {
   }
 
   async create(userData: CreateUserDto): Promise<Partial<User>> {
-    const { name, email, password, firstname, status } = userData;
+    const { name, email, password, firstname, status, siren_entreprise } = userData;
 
     if (!name || !email) {
       throw new BadRequestException('Name and email are required');
@@ -47,18 +47,12 @@ export class UsersService {
       password: hashedPassword,
       firstname: firstname ? firstname.trim() : name.trim(),
       status: status || 'active',
+      siren_entreprise: siren_entreprise,
     });
 
     await this.usersRepository.save(newUser);
 
-    return newUser;
-    //return {
-    //  name: newUser.name,
-    //  firstname: newUser.firstname,
-    //  email: newUser.email,
-    //  status: newUser.status,
-    //  id: newUser.id,
-    //};
+    return newUser; 
   }
 
   async update(id: number, updateData: UpdateUserDto): Promise<User> {
