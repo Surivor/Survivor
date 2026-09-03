@@ -8,6 +8,7 @@ export default function QrCodeCard() {
   const [isOpen, setIsOpen] = useState(false);
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleOpenPopup = async () => {
     setIsOpen(true);
@@ -27,6 +28,17 @@ export default function QrCodeCard() {
       console.error("Erreur API:", e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!qrToken) return;
+    try {
+      await navigator.clipboard.writeText(qrToken);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Échec de la copie", err);
     }
   };
 
@@ -61,13 +73,21 @@ export default function QrCodeCard() {
               {loading ? (
                 <p className="text-sm font-bold text-[#1B3A6B]">Génération sécurisée...</p>
               ) : qrToken ? (
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                  {}
+                <div 
+                  className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 relative cursor-pointer transition-transform active:scale-95"
+                  onClick={handleCopy}
+                  title="Cliquer pour copier le token"
+                >
                   <img 
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=1B3A6B&data=${qrToken}`} 
                     alt="QR code dynamique" 
                     className="mx-auto h-48 w-48 object-contain" 
                   />
+                  {isCopied && (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-3 py-1.5 rounded text-sm font-bold shadow-lg">
+                      Token copié !
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm font-bold text-red-500">Erreur de connexion au serveur.</p>
