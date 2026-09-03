@@ -38,6 +38,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       WATCHPACK_POLLING: "true"
+      API_URL: http://backend:3000
       DB_HOST: db
       DB_PORT: 3306
       DB_NAME: survivor
@@ -59,7 +60,10 @@ services:
       - "3001:3001"
     networks:
       - survivor
+    depends_on:
+    - backend
     environment:
+      API_URL: http://backend:3000
       NODE_ENV: development
       PORT: 3001
       WATCHPACK_POLLING: "true"
