@@ -29,7 +29,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     removeToken();
-    router.push("/login");
+    router.push("/");
   };
 
   useEffect(() => {
