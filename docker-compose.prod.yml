@@ -1,0 +1,57 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: survivor
+      MYSQL_USER: survivor
+      MYSQL_PASSWORD: survivor
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - survivor
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  backend:
+    image: survivor-backend:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks:
+      - survivor
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: survivor
+      DB_USER: survivor
+      DB_PASSWORD: survivor
+    restart: unless-stopped
+
+  frontend:
+    image: survivor-frontend:latest
+    ports:
+      - "3001:3001"
+    networks:
+      - survivor
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  survivor:
