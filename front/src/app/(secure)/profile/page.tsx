@@ -27,6 +27,11 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const handleLogout = () => {
+    removeToken();
+    router.push("/login");
+  };
+
   useEffect(() => {
     const token = getToken();
 
@@ -103,14 +108,21 @@ export default function ProfilePage() {
       <Header />
       <div className="flex min-h-screen flex-col items-center gap-8 bg-zinc-50 px-4 pt-8">
         <div className="w-full max-w-2xl rounded-2xl bg-white p-7 shadow-md space-y-6">
-          <div>
+          <div className="flex items-start justify-between gap-4">
             <h1 className="text-2xl font-bold font-title text-primary mb-4">Mon profil</h1>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-full border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
+            >
+              Déconnexion
+            </button>
+          </div>
 
-            <div className="space-y-2 text-sm text-zinc-900">
-              <p><span className="font-semibold">Nom :</span> {user.name}</p>
-              <p><span className="font-semibold">Prénom :</span> {user.firstname}</p>
-              <p><span className="font-semibold">Email :</span> {user.email}</p>
-            </div>
+          <div className="space-y-2 text-sm text-zinc-900">
+            <p><span className="font-semibold">Nom :</span> {user.name}</p>
+            <p><span className="font-semibold">Prénom :</span> {user.firstname}</p>
+            <p><span className="font-semibold">Email :</span> {user.email}</p>
           </div>
 
           <BalanceCard balance={balance.available} used={balance.used} limit={balance.limit} />
