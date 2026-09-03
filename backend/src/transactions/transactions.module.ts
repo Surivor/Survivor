@@ -6,12 +6,14 @@ import { TransactionsController } from './transactions.controller';
 import { PassportModule } from '@nestjs/passport';
 import { Transaction } from './entities/transaction.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { User } from '../users/user.entity';
 
 
 @Module({
   imports: [
     PassportModule,
     TypeOrmModule.forFeature([Transaction]),
+    User,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
