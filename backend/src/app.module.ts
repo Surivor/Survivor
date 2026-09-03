@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppService, PartnersInitService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
 import { Partner } from './partners/partner.entity';
@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { PartnersModule } from './partners/partners.module';
 import { HealthController } from './health/health.controller';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -22,14 +23,16 @@ import { HealthController } from './health/health.controller';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    TypeOrmModule.forFeature([User, Partner]),
     UsersModule,
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
     AuthModule,
     TransactionsModule,
     PartnersModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    PartnersInitService
+  ],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ConflictException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -34,6 +34,11 @@ export class UsersService {
       throw new BadRequestException('Name and email are required');
     }
 
+    const existingUser = await this.findByEmail(email.trim());
+      if (existingUser) {
+      throw new ConflictException(`L'adresse email ${email} est déjà utilisée.`);
+  }
+
     const hashedPassword = password ? await bcrypt.hash(password, 10) : '';
 
     const newUser = this.usersRepository.create({
@@ -60,6 +65,24 @@ export class UsersService {
     const updatedUser = this.usersRepository.merge(user, updateData);
     
     return await this.usersRepository.save(updatedUser);
+  }
+
+  async getProfileInfo(id: number) {
+    const user = await this.usersRepository.findOne({
+      where: { id: id },
+      select: {
+        name: true,
+        firstname: true,
+        email: true,
+        status: true,
+      }
+    });
+
+    if (!user) {
+      throw new NotFoundException('User undefined');
+    }
+
+    return user;
   }
 }
 
