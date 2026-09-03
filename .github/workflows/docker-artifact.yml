@@ -2,9 +2,11 @@ name: Build an Artefact Docker Compose and Release
 
 on:
   push:
+    branches: [ "main" ]
     tags:
       - 'v*'
-
+  pull_request:
+    branches: [ "main" ]
 jobs:
   build-and-pack:
     runs-on: ubuntu-latest
