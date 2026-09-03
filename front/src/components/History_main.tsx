@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SimulationBanner from "./SimulationBanner";
 
 type Transaction = {
     name?: string;
@@ -8,6 +9,7 @@ type Transaction = {
 
 export default function HistoryMain({ transactions = [] }: { transactions: Transaction[] }) {
     return (
+        <>
         <div className="w-full rounded-[28px] bg-white border border-gray-100 shadow-sm p-6">
             <div className="flex items-center justify-between mb-2">
                 <h2 className="text-black font-bold font-title text-xl">Dernières transactions</h2>
@@ -31,5 +33,7 @@ export default function HistoryMain({ transactions = [] }: { transactions: Trans
                 ))}
             </div>
         </div>
+        {}
+        </>
     );
 }
