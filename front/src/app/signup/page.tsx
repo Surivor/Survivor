@@ -26,7 +26,7 @@ export default function SignupPage() {
       body.businessPurpose = formData.get('businessPurpose')
       body.siren = formData.get('siren')
     }
-    const response = await fetch('http://localhost:3000/auth/register', {
+    const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

@@ -28,7 +28,7 @@ export default function HistoryPage() {
 
         async function loadHistory() {
             try {
-                const res = await fetch("http://localhost:3000/api/transactions/history", {
+                const res = await fetch("/api/transactions/history", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
