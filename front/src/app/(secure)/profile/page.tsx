@@ -50,8 +50,8 @@ export default function ProfilePage() {
         };
 
         const [meRes, balanceRes] = await Promise.all([
-          fetch("http://localhost:3000/api/users/me", { headers }),
-          fetch("http://localhost:3000/api/transactions/balance", { headers }),
+          fetch("/api/users/me", { headers }),
+          fetch("/api/transactions/balance", { headers }),
         ]);
 
         if (meRes.status === 401 || balanceRes.status === 401) {

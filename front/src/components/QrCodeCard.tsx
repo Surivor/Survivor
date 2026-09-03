@@ -15,7 +15,7 @@ export default function QrCodeCard() {
     
     try {
       const token = getToken();
-      const res = await fetch("http://localhost:3000/api/transactions/qrcode", {
+      const res = await fetch("api/transactions/qrcode", {
         headers: { Authorization: `Bearer ${token}` }
       });
       
