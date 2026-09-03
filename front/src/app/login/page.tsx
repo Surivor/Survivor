@@ -32,7 +32,7 @@ export default function LoginPage() {
 
       const data = await response.json()
       saveToken(data.access_token)
-      router.push('/profile')
+      router.push('/CGU')
     } catch (err) {
       setError(err instanceof Error ? err.message : "Impossible de se connecter au serveur")
     } finally {
