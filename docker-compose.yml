@@ -1,7 +1,7 @@
 services:
   db:
     image: mysql:8.0
-    container_name: survivor-db
+    #container_name: survivor-db
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: survivor
@@ -22,10 +22,11 @@ services:
       start_period: 20s
 
   backend:
+    image: survivor-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: survivor-backend
+    #container_name: survivor-backend
     depends_on:
       db:
         condition: service_healthy
@@ -34,7 +35,7 @@ services:
     networks:
       - survivor
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3000
       WATCHPACK_POLLING: "true"
       DB_HOST: db
@@ -49,10 +50,11 @@ services:
     restart: unless-stopped
 
   frontend:
+    image: survivor-frontend:latest
     build:
       context: ./front
       dockerfile: Dockerfile
-    container_name: survivor-frontend
+    #container_name: survivor-frontend
     ports:
       - "3001:3001"
     networks:
