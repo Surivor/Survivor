@@ -20,23 +20,39 @@ export class PartnersService {
     ) {}
 
     findAll(): Promise<Partner[]> {
-	return this.partnersRepository.find();
+	return this.partnersRepository.find({ relations: { user: true } });
+    }
+
+    async findOne(id: number): Promise<Partner> {
+	const partner = await this.partnersRepository.findOne({
+	    where: { id },
+	    relations: { user: true },
+	});
+	if (!partner) {
+	    throw new NotFoundException(`Partner with ID ${id} not found`);
+	}
+	return partner;
     }
 
     async findBySiren(siren: number): Promise<Partner | null> {
-	return this.partnersRepository.findOneBy({ siren });
+	return this.partnersRepository.findOne({
+	    where: { siren },
+	    relations: { user: true },
+	});
     }
 
     async getFeatured(): Promise<Partner[]> {
 	return this.partnersRepository.find({
-	    where: { featured: true }
-	})
+	    where: { featured: true },
+	    relations: { user: true },
+	});
     }
 
     async getVerified(): Promise<Partner[]> {
 	return this.partnersRepository.find({
-	    where: { verified: true }
-	})
+	    where: { verified: true },
+	    relations: { user: true },
+	});
     }
 
 
@@ -73,9 +89,49 @@ export class PartnersService {
 	    throw new NotFoundException(`Partner with ID ${id} not found`);
 	}
 
-	const updatedUser = this.partnersRepository.merge(partner, updateData);
+	if (updateData.userdto) {
+	    await this.usersService.update(id, updateData.userdto);
+	}
 
-	return await this.partnersRepository.save(updatedUser);
+	const updatedPartner = this.partnersRepository.merge(partner, updateData);
+
+	return await this.partnersRepository.save(updatedPartner);
+    }
+
+    async validatePartner(id: number): Promise<Partner> {
+	const partner = await this.partnersRepository.findOneBy({ id });
+	if (!partner) {
+	    throw new NotFoundException(`Partner with ID ${id} not found`);
+	}
+	partner.verified = true;
+	try {
+	    await this.usersService.validateUser(id);
+	} catch (e) {}
+	return await this.partnersRepository.save(partner);
+    }
+
+    async suspendPartner(id: number): Promise<Partner> {
+	const partner = await this.partnersRepository.findOneBy({ id });
+	if (!partner) {
+	    throw new NotFoundException(`Partner with ID ${id} not found`);
+	}
+	partner.verified = false;
+	try {
+	    await this.usersService.suspendUser(id);
+	} catch (e) {}
+	return await this.partnersRepository.save(partner);
+    }
+
+    async removePartner(id: number): Promise<void> {
+	const partner = await this.partnersRepository.findOneBy({ id });
+	if (!partner) {
+	    throw new NotFoundException(`Partner with ID ${id} not found`);
+	}
+	await this.partnersRepository.remove(partner);
+	try {
+	    await this.usersService.removeUser(id);
+	} catch (e) {}
     }
 }
+
 
