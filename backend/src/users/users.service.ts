@@ -27,6 +27,12 @@ export class UsersService {
     return this.usersRepository.findOneBy({ email });
   }
 
+  async findByStatus(status: string): Promise<User[]> {
+    return this.usersRepository.find({
+      where: { status },
+    });
+  }
+
   async create(userData: CreateUserDto): Promise<Partial<User>> {
     const { name, email, password, firstname, status, siren_entreprise } = userData;
 

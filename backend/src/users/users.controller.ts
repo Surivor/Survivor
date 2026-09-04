@@ -63,6 +63,13 @@ export class UsersController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Get('by-status/:status')
+  async findByStatus(@Param('status') status: string) {
+    return this.usersService.findByStatus(status);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Get(':id')
   async getProfile(@Param('id') id: string) {
     return this.usersService.getProfileInfoByID(id);
