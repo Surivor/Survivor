@@ -123,6 +123,7 @@ export default function ProfilePage() {
             <p><span className="font-semibold">Nom :</span> {user.name}</p>
             <p><span className="font-semibold">Prénom :</span> {user.firstname}</p>
             <p><span className="font-semibold">Email :</span> {user.email}</p>
+            <p><span className="font-semibold">Statut :</span> {user.status}</p>
           </div>
 
           <BalanceCard balance={balance.available} used={balance.used} limit={balance.limit} />

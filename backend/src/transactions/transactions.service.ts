@@ -76,7 +76,7 @@ export class TransactionsService {
 
   getQrCode(userId: number) {
     const payload = { sub: userId, purpose: 'payment_qrcode' };
-    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
+    const token = this.jwtService.sign(payload, { expiresIn: '5m' });
     return { code: token };
   }
 
