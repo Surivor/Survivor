@@ -26,6 +26,10 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                 });
 
                 if (!res.ok) {
+                    if (res.status === 404) {
+                        router.push("/admin/users");
+                        return;
+                    }
                     const errText = await res.text();
                     throw new Error(errText || "Impossible de récupérer l'utilisateur");
                 }
@@ -40,7 +44,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
         };
 
         fetchUser();
-    }, [id]);
+    }, [id, router]);
 
     const handleValidate = async () => {
         setLoading(true);
@@ -123,9 +127,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
             }
             
             setMessage("L'utilisateur a été supprimé avec succès.");
-            setTimeout(() => {
-                router.push("/admin");
-            }, 2000);
+            router.push("/admin/users");
 
         } catch (error: any) {
             setMessage(error.message);
