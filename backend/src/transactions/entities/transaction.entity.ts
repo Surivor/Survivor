@@ -14,7 +14,9 @@ export class Transaction {
   @Column({ nullable: true })
   partnerId: number;
 
+  @Column({ unique: true, nullable: true })
+  idempotencyKey: string;
+
   @CreateDateColumn()
   createdAt: Date;
-
 }

@@ -12,7 +12,19 @@ export class TransactionsService {
     private jwtService: JwtService,
   ) {}
 
-  async processPayment(qrCodeToken: string, amount: number, partnerId: number) {
+  async processPayment(qrCodeToken: string, amount: number, partnerId: number, idempotencyKey: string) {
+    const existingTransaction = await this.transactionRepo.findOne({
+      where: { idempotencyKey }
+    });
+
+    if (existingTransaction) {
+      return {
+        success: true,
+        message: `Transaction déjà traitée`,
+        transaction: existingTransaction
+      };
+    }
+
     let payload;
 
     try {
@@ -26,8 +38,8 @@ export class TransactionsService {
     }
 
     const userId = payload.sub;
-
     const { balance } = await this.getBalance(userId);
+
     if (balance < amount) {
       throw new BadRequestException('Solde insuffisant pour effectuer ce paiement');
     }
@@ -36,13 +48,14 @@ export class TransactionsService {
       userId: userId,
       amount: amount,
       partnerId: partnerId,
+      idempotencyKey: idempotencyKey
     });
 
     await this.transactionRepo.save(newTransaction);
 
     return {
       success: true,
-      message: `Transaction  : -${amount}€`,
+      message: `Transaction effectuée : -${amount}`,
       transaction: newTransaction
     };
   }
