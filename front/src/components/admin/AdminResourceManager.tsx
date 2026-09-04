@@ -15,7 +15,7 @@ export default function AdminResourceManager({ resourceType }: Props) {
     const [error, setError] = useState<string | null>(null);
 
     const title = resourceType === "user" ? "Gestion des Utilisateurs" : "Gestion des Partenaires";
-    const apiEndpoint = resourceType === "user" ? "/api/users" : "/api/partners";
+    const apiEndpoint = resourceType === "user" ? "/api/users/by-status/user" : "/api/users/by-status/partenaire";
 
     useEffect(() => {
         const token = getToken();
