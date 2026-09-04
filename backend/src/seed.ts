@@ -134,6 +134,8 @@ async function bootstrap() {
   
     fs.writeFileSync('transactions.csv', csvContent, 'utf8');
     console.log('Fichier transactions.csv généré avec succès !');
+
+    app.close();
 }
 
 bootstrap();
