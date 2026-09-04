@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Req, UseGuards, UnauthorizedException, Headers, BadRequestException } from '@nestjs/common';
-import type { Request } from 'express';
+import { Controller, Get, Post, Body, Req, Res, UseGuards, UnauthorizedException, Headers, BadRequestException } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { TransactionsService } from './transactions.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import * as fs from 'fs';
 
 @ApiTags('Transactions')
 @ApiBearerAuth()
@@ -72,5 +73,13 @@ export class TransactionsController {
     }
 
     return this.transactionsService.addFunds(userId, amount);
+  }
+
+  @Get('transactions.csv')
+  getTransactionsCsv(@Res() res: Response) {
+    const file = fs.readFileSync('transactions.csv', 'utf8');
+    res.header('Content-Type', 'text/csv');
+    res.attachment('transactions.csv');
+    return res.send(file);
   }
 }
