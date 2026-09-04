@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Req, UseGuards, UnauthorizedException, Delete } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '../auth/admin.guard';
+
 @ApiTags('Users')
 @Controller('api/users')
 export class UsersController {
@@ -11,7 +13,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Retrieve all users' })
   @ApiResponse({ status: 200, description: 'Returns a list of all users.' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -47,7 +49,7 @@ export class UsersController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
-  async getProfile(@Req() req: Request) {
+  async getProfileMe(@Req() req: Request) {
     const userPayload = (req as any).user;
     
     const userId = userPayload?.sub || userPayload?.userId || userPayload?.id;
@@ -57,5 +59,42 @@ export class UsersController {
     }
 
     return this.usersService.getProfileInfo(userId);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Get(':id')
+  async getProfile(@Param('id') id: string) {
+    return this.usersService.getProfileInfoByID(id);
+  }
+
+  @ApiOperation({ summary: 'Validate a user account' })
+  @ApiParam({ name: 'id', description: 'The ID of the user to validate', type: 'string' })
+  @ApiResponse({ status: 200, description: 'The user has been successfully validated.' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Patch(':id/validate')
+  validateUser(@Param('id') id: string) {
+    return this.usersService.validateUser(+id);
+  }
+
+  @ApiOperation({ summary: 'Suspend a user account' })
+  @ApiParam({ name: 'id', description: 'The ID of the user to suspend', type: 'string' })
+  @ApiResponse({ status: 200, description: 'The user has been successfully suspended.' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Patch(':id/suspend')
+  suspendUser(@Param('id') id: string) {
+    return this.usersService.suspendUser(+id);
+  }
+
+  @ApiOperation({ summary: 'Delete a user account' })
+  @ApiParam({ name: 'id', description: 'The ID of the user to delete', type: 'string' })
+  @ApiResponse({ status: 200, description: 'The user has been successfully deleted.' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Delete(':id')
+  removeUser(@Param('id') id: string) {
+    return this.usersService.removeUser(+id);
   }
 }

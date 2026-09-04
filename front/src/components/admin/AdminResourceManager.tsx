@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getToken } from "@/lib/auth";
 import Header from "@/components/Header";
 
@@ -14,7 +15,7 @@ export default function AdminResourceManager({ resourceType }: Props) {
     const [error, setError] = useState<string | null>(null);
 
     const title = resourceType === "user" ? "Gestion des Utilisateurs" : "Gestion des Partenaires";
-    const apiEndpoint = resourceType === "user" ? "/api/admin/users" : "/api/admin/partners";
+    const apiEndpoint = resourceType === "user" ? "/api/users" : "/api/partners";
 
     useEffect(() => {
         const token = getToken();
@@ -25,7 +26,11 @@ export default function AdminResourceManager({ resourceType }: Props) {
                 const res = await fetch(apiEndpoint, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                if (!res.ok) throw new Error("Erreur lors de la récupération des données.");
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error("API Error Response:", res.status, errorText);
+                    throw new Error(`Erreur ${res.status}: ${errorText || "Impossible de récupérer les données."}`);
+                }
                 const data = await res.json();
                 setItems(Array.isArray(data) ? data : []);
             } catch (err: any) {
@@ -91,9 +96,12 @@ export default function AdminResourceManager({ resourceType }: Props) {
                                                 </td>
                                                 <td className="py-4 px-4 text-right">
                                                     {/* Boutons d'actions contextuels */}
-                                                    <button className="rounded-xl bg-action px-4 py-2 text-xs font-semibold text-white hover:bg-action/90 transition">
+                                                    <Link 
+                                                        href={`/admin/${resourceType}s/${item.id}`}
+                                                        className="inline-block rounded-xl bg-action px-4 py-2 text-xs font-semibold text-white hover:bg-action/90 transition"
+                                                    >
                                                         Gérer
-                                                    </button>
+                                                    </Link>
                                                 </td>
                                             </tr>
                                         ))}

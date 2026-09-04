@@ -84,5 +84,59 @@ export class UsersService {
 
     return user;
   }
+
+  async getProfileInfoByID(id: string): Promise<User> {
+    const userId = parseInt(id, 10);
+    
+    if (isNaN(userId)) {
+      throw new NotFoundException(`ID invalide : ${id}`);
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        firstname: true,
+        email: true,
+        status: true,
+        isAdmin: true,
+        isVerified: true,
+        siren_entreprise: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Utilisateur avec l'ID #${id} introuvable.`);
+    }
+
+    return user;
+  }
+
+  async validateUser(id: number): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    user.isVerified = true;
+    return await this.usersRepository.save(user);
+  }
+
+  async suspendUser(id: number): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    user.isVerified = false;
+    return await this.usersRepository.save(user);
+  }
+
+  async removeUser(id: number): Promise<void> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    await this.usersRepository.remove(user);
+  }
 }
 
