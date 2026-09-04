@@ -5,7 +5,7 @@ import { User } from './users/user.entity';
 import { Partner } from './partners/partner.entity';
 import { Transaction } from './transactions/entities/transaction.entity'; 
 import * as fs from 'fs';
-
+import * as bcrypt from 'bcrypt';
 async function bootstrap() {
     const app = await NestFactory.createApplicationContext(AppModule);
     const dataSource = app.get(DataSource);
@@ -21,6 +21,22 @@ async function bootstrap() {
     await userRepository.clear({});
 
     await dataSource.query('SET FOREIGN_KEY_CHECKS = 1;');
+
+    const adminEmail = process.env.ADMIN_EMAIL || 'ministre@survivor.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'SuperAdminPassword123!';
+    const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
+
+    const adminUser = userRepository.create({
+      name: 'Ministre',
+      firstname: 'Admin',
+      email: adminEmail,
+      password: hashedAdminPassword,
+      isAdmin: true,
+      isVerified: true,
+      status: 'admin',
+      siren_entreprise: 0,
+    });
+    await userRepository.save(adminUser);
 
     const partnersData = [
       { name: 'Poney Dream 78', siren: 780001112, objet_social: 'Club de poney et team building', region: 'IDF', category: 'Loisirs' },
@@ -73,6 +89,7 @@ async function bootstrap() {
         email: `${p.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@jeb.fr`,
         password: 'securepassword',
         status: 'partenaire',
+        isVerified: true,
       });
       const savedUser = await userRepository.save(user);
   
@@ -92,6 +109,7 @@ async function bootstrap() {
         email: e.email,
         password: e.password,
         status: 'user',
+        isVerified: true,
       });
       
       const savedUser = await userRepository.save(employee);
