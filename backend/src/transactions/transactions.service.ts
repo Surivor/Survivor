@@ -11,11 +11,10 @@ export class TransactionsService {
     private transactionRepo: Repository<Transaction>,
     private jwtService: JwtService,
   ) {}
-  
-  
 
   async processPayment(qrCodeToken: string, amount: number, partnerId: number) {
     let payload;
+
     try {
       payload = this.jwtService.verify(qrCodeToken);
     } catch (error) {
@@ -28,6 +27,11 @@ export class TransactionsService {
 
     const userId = payload.sub;
 
+    const { balance } = await this.getBalance(userId);
+    if (balance < amount) {
+      throw new BadRequestException('Solde insuffisant pour effectuer ce paiement');
+    }
+
     const newTransaction = this.transactionRepo.create({
       userId: userId,
       amount: amount,
@@ -38,26 +42,35 @@ export class TransactionsService {
 
     return {
       success: true,
-      message: `Transaction: ${amount}`,
+      message: `Transaction  : -${amount}€`,
       transaction: newTransaction
     };
   }
 
   async getBalance(userId: number) {
-    const result = await this.transactionRepo
-      .createQueryBuilder("transaction")
-      .select("SUM(transaction.amount)", "total")
-      .where("transaction.userId = :userId", { userId: userId })
+
+    const creditsResult = await this.transactionRepo
+      .createQueryBuilder("t")
+      .select("SUM(t.amount)", "total")
+      .where("t.userId = :userId AND t.partnerId IS NULL", { userId })
       .getRawOne();
 
-    const currentBalance = result.total ? parseFloat(result.total) : 0;
+    const debitsResult = await this.transactionRepo
+      .createQueryBuilder("t")
+      .select("SUM(t.amount)", "total")
+      .where("t.userId = :userId AND t.partnerId IS NOT NULL", { userId })
+      .getRawOne();
 
-    return { balance: currentBalance };
+    const totalCredits = creditsResult.total ? parseFloat(creditsResult.total) : 0;
+    const totalDebits = debitsResult.total ? parseFloat(debitsResult.total) : 0;
+
+    return { balance: totalCredits - totalDebits };
   }
 
   async getHistory(userId: number) {
     return await this.transactionRepo.find({
-      where: { userId: userId }
+      where: { userId: userId },
+      order: { id: 'DESC' }
     });
   }
 
@@ -78,9 +91,27 @@ export class TransactionsService {
 
     return {
       success: true,
-      message:  `Transaction ${amount} stored`,
+      message: `Transaction ${amount} stocked`,
       data: newTransaction
     };
   }
-}
 
+  async addFunds(userId: number, amount: number) {
+    if (amount <= 0) {
+      throw new BadRequestException("Le montant doit être positif");
+    }
+
+    const newTransaction = this.transactionRepo.create({
+      userId: userId,
+      amount: amount,
+    });
+
+    await this.transactionRepo.save(newTransaction);
+
+    return {
+      success: true,
+      message: `Compte du user ${userId} rechargé de ${amount}€`,
+      transaction: newTransaction
+    };
+  }
+}

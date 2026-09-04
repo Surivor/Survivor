@@ -18,6 +18,9 @@ export class User {
   @Column({ default: '' })
   firstname: string;
 
+  @Column('decimal', { precision: 10, scale: 2, default: 300 })
+  balance_initial: number;
+
   @Column({ default: 'active' })
   status: string;
 

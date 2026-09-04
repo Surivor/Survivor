@@ -16,3 +16,18 @@ export function removeToken() {
 export function isLoggedIn(): boolean {
   return !!getToken();
 }
+
+export function getUserRole(): string | null {
+  const token = getToken();
+  if (!token) return null;
+  
+  try {
+    const base64Payload = token.split('.')[1];
+    const payload = JSON.parse(atob(base64Payload));
+
+    return payload.status || null; 
+  } catch (e) {
+    console.error("Erreur de décodage du token", e);
+    return null;
+  }
+}

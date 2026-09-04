@@ -18,7 +18,7 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
 
     async function verifyAccess() {
       try {
-        const res = await fetch("http://localhost:3000/api/users/me", {
+        const res = await fetch("/api/users/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
 
