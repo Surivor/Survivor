@@ -6,6 +6,15 @@
 
 ### informations générale
 
+responsable du traitement:
+l'équipe ticket tout, soit:
+- Arthur Gauthier
+- Roméo Pereira
+- Titouan Menoret
+- Ronan Botrel
+
+Destinataire des données récupérées:
+- le service (ticket tout)
 
 ### informations sur la base de donnée
 
