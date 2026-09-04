@@ -7,14 +7,21 @@ import { getUserRole } from "@/lib/auth";
 
 export default function Header() {
     const [isPartner, setIsPartner] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         const role = getUserRole();
         
         console.log("Rôle extrait du token :", role);
 
-        if (role && typeof role === 'string' && role.toLowerCase() === "partenaire") {
-            setIsPartner(true);
+        if (role && typeof role === 'string') {
+            const lowerRole = role.toLowerCase();
+            if (lowerRole === "partenaire") {
+                setIsPartner(true);
+            }
+            if (lowerRole === "admin" || lowerRole === "administrateur") {
+                setIsAdmin(true);
+            }
         } 
     }, []);
 
@@ -51,6 +58,12 @@ export default function Header() {
                         {isPartner && (
                             <Link href="/partner-dashboard" className="text-zinc-600 hover:text-primary font-medium transition-colors">
                                 Espace partenaire
+                            </Link>
+                        )}
+                        
+                        {isAdmin && (
+                            <Link href="/admin" className="text-zinc-600 hover:text-primary font-medium transition-colors">
+                                Espace admin
                             </Link>
                         )}
                         
