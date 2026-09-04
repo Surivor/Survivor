@@ -11,6 +11,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Retrieve all users' })
   @ApiResponse({ status: 200, description: 'Returns a list of all users.' })
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -27,6 +28,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiParam({ name: 'id', description: 'The ID of the user to update', type: 'string' })
   @ApiResponse({ status: 200, description: 'The user has been successfully updated.' })
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateData: UpdateUserDto) {
     return this.usersService.update(+id, updateData);

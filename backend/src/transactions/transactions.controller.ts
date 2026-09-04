@@ -56,10 +56,15 @@ export class TransactionsController {
   @UseGuards(AuthGuard('jwt'))
   createTransaction(
     @Req() req: Request, 
-    @Body() body: { amount: number, qrCodeToken: string }
+    @Body() body: { amount: number, qrCodeToken: string },
+    @Headers('x-idempotency-key') idempotencyKey: string
   ) {
+    if (!idempotencyKey) {
+      throw new BadRequestException('double paiementsdétécté');
+    }
+    
     const partnerId = (req as any).user.userId;
-    return this.transactionsService.processPayment(body.qrCodeToken, body.amount, partnerId);
+    return this.transactionsService.processPayment(body.qrCodeToken, body.amount, partnerId, idempotencyKey);
   }
 
   @Post('admin/fund')

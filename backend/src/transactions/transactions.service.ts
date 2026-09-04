@@ -1,6 +1,6 @@
-import { Injectable, UnauthorizedException, BadRequestException} from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Transaction } from './entities/transaction.entity';
 
@@ -10,41 +10,61 @@ export class TransactionsService {
     @InjectRepository(Transaction)
     private transactionRepo: Repository<Transaction>,
     private jwtService: JwtService,
+    private dataSource: DataSource
   ) {}
 
-  async processPayment(qrCodeToken: string, amount: number, partnerId: number) {
+  async processPayment(qrCodeToken: string, amount: number, partnerId: number, idempotencyKey: string) {
+    const existing = await this.transactionRepo.findOne({ where: { idempotencyKey } });
+    if (existing) return { success: true, message: 'Transaction déjà traitée', transaction: existing };
+
     let payload;
-
-    try {
-      payload = this.jwtService.verify(qrCodeToken);
-    } catch (error) {
-      throw new UnauthorizedException('invalid QR Code');
-    }
-
-    if (payload.purpose !== 'payment_qrcode') {
-      throw new BadRequestException('this QR code can\'t be used to share money');
-    }
-
+    try { payload = this.jwtService.verify(qrCodeToken); } 
+    catch (error) { throw new UnauthorizedException('invalid QR Code'); }
+    if (payload.purpose !== 'payment_qrcode') throw new BadRequestException('Invalid purpose');
     const userId = payload.sub;
 
-    const { balance } = await this.getBalance(userId);
-    if (balance < amount) {
-      throw new BadRequestException('Solde insuffisant pour effectuer ce paiement');
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction('SERIALIZABLE'); 
+
+    try {
+      const creditsResult = await queryRunner.manager
+        .createQueryBuilder(Transaction, "t")
+        .select("SUM(t.amount)", "total")
+        .where("t.userId = :userId AND t.partnerId IS NULL", { userId })
+        .getRawOne();
+      
+      const debitsResult = await queryRunner.manager
+        .createQueryBuilder(Transaction, "t")
+        .select("SUM(t.amount)", "total")
+        .where("t.userId = :userId AND t.partnerId IS NOT NULL", { userId })
+        .getRawOne();
+
+      const balance = (creditsResult.total ? parseFloat(creditsResult.total) : 0) 
+                    - (debitsResult.total ? parseFloat(debitsResult.total) : 0);
+
+      if (balance < amount) {
+        throw new BadRequestException('Solde insuffisant pour effectuer ce paiement');
+      }
+
+      const newTransaction = queryRunner.manager.create(Transaction, {
+        userId: userId,
+        amount: amount,
+        partnerId: partnerId,
+        idempotencyKey: idempotencyKey
+      });
+      await queryRunner.manager.save(newTransaction);
+
+      await queryRunner.commitTransaction(); 
+      
+      return { success: true, transaction: newTransaction };
+
+    } catch (err) {
+      await queryRunner.rollbackTransaction(); 
+      throw err;
+    } finally {
+      await queryRunner.release(); 
     }
-
-    const newTransaction = this.transactionRepo.create({
-      userId: userId,
-      amount: amount,
-      partnerId: partnerId,
-    });
-
-    await this.transactionRepo.save(newTransaction);
-
-    return {
-      success: true,
-      message: `Transaction  : -${amount}€`,
-      transaction: newTransaction
-    };
   }
 
   async getBalance(userId: number) {
