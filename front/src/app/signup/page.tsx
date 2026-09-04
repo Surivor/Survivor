@@ -63,7 +63,6 @@ export default function SignupPage() {
           className="w-full rounded-lg border border-zinc-500 px-4 py-2 text-sm outline-none focus:border-action focus:ring-1 focus:ring-action"
         >
           <option value="" disabled>Choisissez un statut</option>
-          <option value="admin">Admin</option>
           <option value="user">Salarié</option>
           <option value="partenaire">Partenaire</option>
         </select>
