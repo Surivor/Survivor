@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ConflictException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -28,11 +28,16 @@ export class UsersService {
   }
 
   async create(userData: CreateUserDto): Promise<Partial<User>> {
-    const { name, email, password, firstname, status } = userData;
+    const { name, email, password, firstname, status, siren_entreprise } = userData;
 
     if (!name || !email) {
       throw new BadRequestException('Name and email are required');
     }
+
+    const existingUser = await this.findByEmail(email.trim());
+      if (existingUser) {
+      throw new ConflictException(`L'adresse email ${email} est déjà utilisée.`);
+  }
 
     const hashedPassword = password ? await bcrypt.hash(password, 10) : '';
 
@@ -42,18 +47,12 @@ export class UsersService {
       password: hashedPassword,
       firstname: firstname ? firstname.trim() : name.trim(),
       status: status || 'active',
+      siren_entreprise: siren_entreprise,
     });
 
     await this.usersRepository.save(newUser);
 
-    return newUser;
-    //return {
-    //  name: newUser.name,
-    //  firstname: newUser.firstname,
-    //  email: newUser.email,
-    //  status: newUser.status,
-    //  id: newUser.id,
-    //};
+    return newUser; 
   }
 
   async update(id: number, updateData: UpdateUserDto): Promise<User> {

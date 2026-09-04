@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppService, PartnersInitService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
 import { Partner } from './partners/partner.entity';
@@ -9,27 +9,40 @@ import { AuthModule } from './auth/auth.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { PartnersModule } from './partners/partners.module';
 import { HealthController } from './health/health.controller';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST || 'db',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'survivor',
-      entities: [User, Partner],
-      autoLoadEntities: true,
-      synchronize: true,
+    ConfigModule.forRoot(
+      {
+        isGlobal: true,
+        envFilePath : '.env'
+      }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        host: configService.get<string>('DB_HOST', 'db'),
+        port: configService.get<number>('DB_PORT', 3306),
+        username: configService.get<string>('DB_USER', 'root'),
+        password: configService.get<string>('DB_PASSWORD', 'root'),
+        database: configService.get<string>('DB_NAME', 'survivor'),
+        entities: [User, Partner],
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
     }),
+    TypeOrmModule.forFeature([User, Partner]),
     UsersModule,
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
     AuthModule,
     TransactionsModule,
     PartnersModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    PartnersInitService
+  ],
 })
 export class AppModule {}

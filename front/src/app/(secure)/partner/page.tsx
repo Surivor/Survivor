@@ -4,7 +4,9 @@ import Header from "@/components/Header";
 import Partener_main from "@/components/Partener_main";
 
 async function GetParteners() {
-    const result = await fetch("http://backend:3000/api/partners", {
+    const apiUrl = process.env.API_URL || "http://backend:3000";
+    
+    const result = await fetch(`${apiUrl}/api/partners`, {
         cache: "no-cache"
     });
     if (!result.ok)

@@ -28,9 +28,9 @@ export default function MainPage() {
 
             try {
                 const [balanceRes, historyRes, partnersRes] = await Promise.all([
-                    fetch("http://localhost:3000/api/transactions/balance", { headers }),
-                    fetch("http://localhost:3000/api/transactions/history", { headers }),
-                    fetch("http://localhost:3000/api/partners", { headers })
+                    fetch("/api/transactions/balance", { headers }),
+                    fetch("/api/transactions/history", { headers }),
+                    fetch("/api/partners", { headers })
                 ]);
 
                 if (balanceRes.ok) {
