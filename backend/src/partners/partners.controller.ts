@@ -65,7 +65,7 @@ export class PartnersController {
     @ApiParam({ name: 'id', description: 'The ID of the partner to update', type: 'string' })
     @ApiResponse({ status: 200, description: 'The partner has been successfully updated.' })
     @ApiBearerAuth()
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard('jwt'), AdminGuard)
     @Patch(':id')
     update(@Param('id') id: string, @Body() updateData: UpdatePartnerDto) {
         return this.partnersService.update(+id, updateData);

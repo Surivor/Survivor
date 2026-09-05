@@ -104,9 +104,7 @@ export class PartnersService {
 	    throw new NotFoundException(`Partner with ID ${id} not found`);
 	}
 	partner.verified = true;
-	try {
-	    await this.usersService.validateUser(id);
-	} catch (e) {}
+	await this.usersService.validateUser(id);
 	return await this.partnersRepository.save(partner);
     }
 

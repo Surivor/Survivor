@@ -40,7 +40,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiParam({ name: 'id', description: 'The ID of the user to update', type: 'string' })
   @ApiResponse({ status: 200, description: 'The user has been successfully updated.' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateData: UpdateUserDto) {
     return this.usersService.update(+id, updateData);
