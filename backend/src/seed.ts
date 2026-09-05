@@ -26,6 +26,8 @@ async function bootstrap() {
     const adminPassword = process.env.ADMIN_PASSWORD || 'SuperAdminPassword123!';
     const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
 
+    const hashedDefaultPassword = await bcrypt.hash('securepassword', 10);
+
     const adminUser = userRepository.create({
       name: 'Ministre',
       firstname: 'Admin',
@@ -77,7 +79,7 @@ async function bootstrap() {
         firstName,
         lastName: lastNames[index],
         email: `${firstName.toLowerCase()}.${lastNames[index].toLowerCase()}@entreprise.fr`,
-        password: 'securepassword',
+        password: hashedDefaultPassword,
         targetProfile, 
       };
     });
@@ -87,7 +89,7 @@ async function bootstrap() {
       const user = userRepository.create({
         name: p.name,
         email: `${p.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@jeb.fr`,
-        password: 'securepassword',
+        password: hashedDefaultPassword,
         status: 'partenaire',
         isVerified: true,
       });

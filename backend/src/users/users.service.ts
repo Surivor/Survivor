@@ -41,9 +41,9 @@ export class UsersService {
     }
 
     const existingUser = await this.findByEmail(email.trim());
-      if (existingUser) {
+    if (existingUser) {
       throw new ConflictException(`L'adresse email ${email} est déjà utilisée.`);
-  }
+    }
 
     const hashedPassword = password ? await bcrypt.hash(password, 10) : '';
 
