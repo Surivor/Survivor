@@ -97,6 +97,7 @@ async function bootstrap() {
         id: savedUser.id,
         siren: p.siren,
         objet_social: p.objet_social,
+        verified: true,
       });
       await partnerRepository.save(partner);
       savedPartners.push(savedUser);

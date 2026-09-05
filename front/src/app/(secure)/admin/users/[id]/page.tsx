@@ -138,31 +138,31 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
     return (
         <div className="flex min-h-screen flex-col bg-zinc-50">
             <Header />
-            <main className="flex flex-1 flex-col items-center px-8 py-12">
-                <div className="w-full max-w-2xl space-y-8">
+            <main className="flex flex-1 flex-col items-center px-4 md:px-8 py-8 md:py-12">
+                <div className="w-full max-w-2xl space-y-6 md:space-y-8">
                     
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                         <Link href="/admin" className="text-zinc-500 hover:text-primary">
                             ← Retour
                         </Link>
-                        <h1 className="font-title text-3xl font-bold text-primary uppercase">
+                        <h1 className="font-title text-2xl md:text-3xl font-bold text-primary uppercase">
                             Gérer l'utilisateur #{id}
                         </h1>
                     </div>
 
-                    <div className="rounded-[32px] border-2 border-zinc-200 bg-white p-8 shadow-sm flex flex-col gap-6">
+                    <div className="rounded-[24px] md:rounded-[32px] border-2 border-zinc-200 bg-white p-4 md:p-8 shadow-sm flex flex-col gap-6">
                         {pageLoading ? (
                             <p className="text-zinc-500">Chargement des informations...</p>
                         ) : fetchError ? (
                             <p className="text-red-500">Erreur : {fetchError}</p>
                         ) : userData ? (
                             <div className="flex flex-col gap-4 text-zinc-700">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                                     <div className="font-semibold">Nom :</div>
-                                    <div>{userData.name || userData.firstname || 'Non renseigné'}</div>
+                                    <div className="mb-2 sm:mb-0">{userData.name || userData.firstname || 'Non renseigné'}</div>
                                     
                                     <div className="font-semibold">Email :</div>
-                                    <div>{userData.email}</div>
+                                    <div className="mb-2 sm:mb-0 break-all">{userData.email}</div>
                                     
                                     <div className="font-semibold">Statut du compte :</div>
                                     <div>
@@ -182,7 +182,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                             </div>
                         )}
 
-                        <div className="grid grid-cols-3 gap-4 mt-6 border-t border-zinc-200 pt-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 border-t border-zinc-200 pt-6">
                             <button 
                                 onClick={handleDelete} 
                                 disabled={loading}
