@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, ConflictException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,6 +12,38 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
+
+  async findAllAdmin(search?: string, status?: string, isVerified?: string): Promise<User[]> {
+    const whereConditions: any[] = [];
+    const verifiedFilter = isVerified !== undefined ? { isVerified: isVerified === 'true' } : {};
+
+    if (search) {
+      const query = `%${search}%`;
+      whereConditions.push(
+        { name: ILike(query), ...(status ? { status } : {}), ...verifiedFilter },
+        { email: ILike(query), ...(status ? { status } : {}), ...verifiedFilter },
+      );
+    } else {
+      const condition: any = { ...verifiedFilter };
+      if (status) condition.status = status;
+      if (Object.keys(condition).length > 0) {
+        whereConditions.push(condition);
+      }
+    }
+
+    return this.usersRepository.find({
+      where: whereConditions.length > 0 ? whereConditions : {},
+      order: { id: 'ASC' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        status: true,
+        isVerified: true,
+        isAdmin: true,
+      },
+    });
+  }
 
   findAll(): Promise<User[]> {
     return this.usersRepository.find();

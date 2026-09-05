@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Req, UseGuards, UnauthorizedException, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Req, UseGuards, UnauthorizedException, Delete, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -10,6 +10,16 @@ import { AdminGuard } from '../auth/admin.guard';
 @Controller('api/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('admin/all')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  async getAllUsers(
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('isVerified') isVerified?: string,
+  ) {
+    return this.usersService.findAllAdmin(search, status, isVerified);
+  }
 
   @ApiOperation({ summary: 'Retrieve all users' })
   @ApiResponse({ status: 200, description: 'Returns a list of all users.' })
