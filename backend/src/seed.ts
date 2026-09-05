@@ -97,6 +97,7 @@ async function bootstrap() {
         id: savedUser.id,
         siren: p.siren,
         objet_social: p.objet_social,
+        verified: true,
       });
       await partnerRepository.save(partner);
       savedPartners.push(savedUser);
@@ -134,6 +135,8 @@ async function bootstrap() {
   
     fs.writeFileSync('transactions.csv', csvContent, 'utf8');
     console.log('Fichier transactions.csv généré avec succès !');
+
+    app.close();
 }
 
 bootstrap();

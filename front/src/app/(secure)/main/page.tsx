@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getToken } from "@/lib/auth"; // Ton utilitaire de token
+import { getToken } from "@/lib/auth";
 import BalanceCard from "@/components/BalanceCard";
 import QrCodeCard from "@/components/QrCodeCard";
 import Header from "@/components/Header";
@@ -30,7 +30,7 @@ export default function MainPage() {
                 const [balanceRes, historyRes, partnersRes] = await Promise.all([
                     fetch("/api/transactions/balance", { headers }),
                     fetch("/api/transactions/history", { headers }),
-                    fetch("/api/partners", { headers })
+                    fetch("/api/partners/verified", { headers })
                 ]);
 
                 if (balanceRes.ok) {
@@ -79,7 +79,7 @@ export default function MainPage() {
                     {}
                     <BalanceCard balance={balance.available} used={balance.used} limit={balance.limit} />
                     <QrCodeCard />
-                    <div className="flex items-start gap-2.5 w-full">
+                    <div className="flex flex-col md:flex-row items-start gap-4 md:gap-2.5 w-full">
                         <HistoryMain transactions={transactions} />
                         <Partener_main partners={partners} />
                     </div>
