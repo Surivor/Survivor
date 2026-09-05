@@ -76,10 +76,6 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
                 });
             }
 
-            setTimeout(() => {
-                router.push("/admin");
-            }, 2000);
-
         } catch (error: any) {
             setMessage(error.message);
         } finally {

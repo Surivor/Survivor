@@ -35,12 +35,12 @@ export class CreateUserDto {
   firstname?: string;
 
   @ApiPropertyOptional({
-    example: 'active',
-    description: 'The current status of the user account'
-  })
+  example: 'user',
+  description: 'The type of user account',
+  enum: ['user', 'partenaire'],
+})
   @IsIn(['user', 'partenaire'])
-  @IsOptional()
-  status?: string;
+  status: string;
 
   @ApiPropertyOptional({
       example: '123456789',
