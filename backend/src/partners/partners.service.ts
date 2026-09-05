@@ -8,6 +8,7 @@ import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
 // Partner
 import { Partner } from './partner.entity';
+import { FeaturedPartnerHistory } from './featured-partner-history.entity';
 import { CreatePartnerDto } from './dto/create-partner.dto';
 import { UpdatePartnerDto } from './dto/update-partner.dto';
 
@@ -16,6 +17,8 @@ export class PartnersService {
     constructor(
 	@InjectRepository(Partner)
 	private partnersRepository: Repository<Partner>,
+	@InjectRepository(FeaturedPartnerHistory)
+	private historyRepository: Repository<FeaturedPartnerHistory>,
 	private usersService: UsersService,
     ) {}
 
@@ -54,7 +57,6 @@ export class PartnersService {
 	    relations: { user: true },
 	});
     }
-
 
     /** create a user & partner entry in the db */
     async create(partnerData: CreatePartnerDto): Promise<Partial<Partner>> {
@@ -96,6 +98,44 @@ export class PartnersService {
 	const updatedPartner = this.partnersRepository.merge(partner, updateData);
 
 	return await this.partnersRepository.save(updatedPartner);
+    }
+
+    async updateFeatured(id: number, featured: boolean, adminId: number): Promise<Partner> {
+	const partner = await this.partnersRepository.findOneBy({ id });
+	if (!partner) {
+	    throw new NotFoundException(`Partner with ID ${id} not found`);
+	}
+
+	if (featured) {
+	    const currentlyFeatured = await this.partnersRepository.findOneBy({ featured: true });
+	    if (currentlyFeatured && currentlyFeatured.id !== id) {
+		currentlyFeatured.featured = false;
+		currentlyFeatured.unfeaturedAt = new Date();
+		await this.partnersRepository.save(currentlyFeatured);
+		
+		await this.historyRepository.save({
+		    partnerId: currentlyFeatured.id,
+		    featured: false,
+		    changedByAdminId: adminId
+		});
+	    }
+	}
+
+	partner.featured = featured;
+	if (featured) {
+	    partner.featuredAt = new Date();
+	} else {
+	    partner.unfeaturedAt = new Date();
+	}
+	const savedPartner = await this.partnersRepository.save(partner);
+
+	await this.historyRepository.save({
+	    partnerId: id,
+	    featured: featured,
+	    changedByAdminId: adminId
+	});
+
+	return savedPartner;
     }
 
     async validatePartner(id: number): Promise<Partner> {

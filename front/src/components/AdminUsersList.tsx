@@ -56,7 +56,7 @@ export default function AdminUsersList({ resourceType }: AdminUsersListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <input
           type="text"
           placeholder="Rechercher par nom ou email..."
@@ -75,8 +75,8 @@ export default function AdminUsersList({ resourceType }: AdminUsersListProps) {
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
+        <table className="w-full min-w-[600px] text-left text-sm">
           <thead className="border-b border-zinc-200 bg-zinc-50 text-zinc-500">
             <tr>
               <th className="px-4 py-3">ID</th>

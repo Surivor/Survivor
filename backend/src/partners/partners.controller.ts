@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { PartnersService } from './partners.service';
 import { CreatePartnerDto } from './dto/create-partner.dto';
 import { UpdatePartnerDto } from './dto/update-partner.dto';
@@ -69,6 +69,16 @@ export class PartnersController {
     @Patch(':id')
     update(@Param('id') id: string, @Body() updateData: UpdatePartnerDto) {
         return this.partnersService.update(+id, updateData);
+    }
+
+    @ApiOperation({ summary: 'Update featured status of a partner' })
+    @ApiParam({ name: 'id', description: 'The ID of the partner to update featured status', type: 'string' })
+    @ApiResponse({ status: 200, description: 'The partner featured status has been successfully updated.' })
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard('jwt'), AdminGuard)
+    @Patch(':id/featured')
+    updateFeatured(@Param('id') id: string, @Body('featured') featured: boolean, @Request() req: any) {
+        return this.partnersService.updateFeatured(+id, featured, req.user.userId);
     }
 
     @ApiOperation({ summary: 'Validate a partner account' })
