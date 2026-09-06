@@ -4,6 +4,7 @@ import { TransactionsService } from './transactions.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import * as fs from 'fs';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 
 @ApiTags('Transactions')
 @ApiBearerAuth()
@@ -56,11 +57,11 @@ export class TransactionsController {
   @UseGuards(AuthGuard('jwt'))
   createTransaction(
     @Req() req: Request, 
-    @Body() body: { amount: number, qrCodeToken: string },
+    @Body() body: CreateTransactionDto,
     @Headers('x-idempotency-key') idempotencyKey: string
   ) {
     if (!idempotencyKey) {
-      throw new BadRequestException('double paiementsdétécté');
+      throw new BadRequestException('Idempotency key manquante');
     }
     
     const partnerId = (req as any).user.userId;

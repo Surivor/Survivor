@@ -1,8 +1,12 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Transaction } from './entities/transaction.entity';
+import { User } from '../users/user.entity';
+import { Partner } from '../partners/partner.entity';
+import { TransactionType } from './entities/transaction.entity';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class TransactionsService {
@@ -14,124 +18,215 @@ export class TransactionsService {
   ) {}
 
   async processPayment(qrCodeToken: string, amount: number, partnerId: number, idempotencyKey: string) {
-    const existing = await this.transactionRepo.findOne({ where: { idempotencyKey } });
-    if (existing) return { success: true, message: 'Transaction déjà traitée', transaction: existing };
+    if (amount <= 0 || !Number.isFinite(amount)) {
+      throw new BadRequestException('Le montant doit être supérieur à 0 et valide');
+    }
+
+    if (!idempotencyKey) {
+      throw new BadRequestException('Idempotency key manquante');
+    }
 
     let payload;
-    try { payload = this.jwtService.verify(qrCodeToken); } 
-    catch (error) { throw new UnauthorizedException('invalid QR Code'); }
-    if (payload.purpose !== 'payment_qrcode') throw new BadRequestException('Invalid purpose');
+    try {
+      payload = this.jwtService.verify(qrCodeToken);
+    } catch {
+      throw new UnauthorizedException('QR Code invalide ou expiré');
+    }
+
+    if (payload.purpose !== 'payment_qrcode' || !payload.jti) {
+      throw new BadRequestException('QR Code invalide');
+    }
+
     const userId = payload.sub;
+    const qrJti = payload.jti;
 
     const queryRunner = this.dataSource.createQueryRunner();
+
     await queryRunner.connect();
-    await queryRunner.startTransaction('SERIALIZABLE'); 
+    await queryRunner.startTransaction('SERIALIZABLE');
 
     try {
-      const creditsResult = await queryRunner.manager
-        .createQueryBuilder(Transaction, "t")
-        .select("SUM(t.amount)", "total")
-        .where("t.userId = :userId AND t.partnerId IS NULL", { userId })
-        .getRawOne();
-      
-      const debitsResult = await queryRunner.manager
-        .createQueryBuilder(Transaction, "t")
-        .select("SUM(t.amount)", "total")
-        .where("t.userId = :userId AND t.partnerId IS NOT NULL", { userId })
-        .getRawOne();
+      const user = await queryRunner.manager
+        .getRepository(User)
+        .createQueryBuilder('user')
+        .setLock('pessimistic_write')
+        .where('user.id = :userId', { userId })
+        .getOne();
 
-      const balance = (creditsResult.total ? parseFloat(creditsResult.total) : 0) 
-                    - (debitsResult.total ? parseFloat(debitsResult.total) : 0);
-
-      if (balance < amount) {
-        throw new BadRequestException('Solde insuffisant pour effectuer ce paiement');
+      if (!user) {
+        throw new BadRequestException('Utilisateur introuvable');
       }
 
-      const newTransaction = queryRunner.manager.create(Transaction, {
-        userId: userId,
-        amount: amount,
-        partnerId: partnerId,
-        idempotencyKey: idempotencyKey
+      if (user.status !== 'user' || !user.isVerified) {
+        throw new BadRequestException('Le compte n\'est pas un salarié valide');
+      }
+
+      const partner = await queryRunner.manager.findOne(Partner, {
+        where: { id: partnerId },
       });
-      await queryRunner.manager.save(newTransaction);
 
-      await queryRunner.commitTransaction(); 
+      if (!partner || !partner.verified) {
+        throw new BadRequestException('Partenaire invalide ou non vérifié');
+      }
+
+      const existing = await queryRunner.manager.findOne(Transaction, {
+        where: { idempotencyKey },
+      });
+
+      if (existing) {
+        await queryRunner.commitTransaction();
+        return {
+          success: true,
+          message: 'Transaction déjà traitée',
+          transaction: existing,
+        };
+      }
+
+      const existingQr = await queryRunner.manager.findOne(Transaction, {
+        where: { qrJti },
+      });
       
-      return { success: true, transaction: newTransaction };
+      if (existingQr) {
+          throw new ConflictException('QR Code déjà utilisé');
+      }
 
-    } catch (err) {
-      await queryRunner.rollbackTransaction(); 
-      throw err;
+      const creditsResult = await queryRunner.manager
+        .createQueryBuilder(Transaction, 't')
+        .select('COALESCE(SUM(t.amount), 0)', 'total')
+        .where('t.userId = :userId', { userId })
+        .andWhere('t.type = :type', { type: TransactionType.CREDIT })
+        .getRawOne();
+
+      const debitsResult = await queryRunner.manager
+        .createQueryBuilder(Transaction, 't')
+        .select('COALESCE(SUM(t.amount), 0)', 'total')
+        .where('t.userId = :userId', { userId })
+        .andWhere('t.type = :type', { type: TransactionType.DEBIT })
+        .getRawOne();
+
+      const credits = Number(creditsResult.total);
+      const debits = Number(debitsResult.total);
+
+      const balance = credits - debits;
+      const newBalance = balance - amount;
+
+      if (newBalance < -150) {
+        throw new BadRequestException('La limite de découvert de 150€ serait dépassée');
+      }
+
+      const transaction = queryRunner.manager.create(Transaction, {
+        userId,
+        partnerId,
+        amount,
+        type: TransactionType.DEBIT,
+        idempotencyKey,
+        qrJti,
+      });
+
+      await queryRunner.manager.save(transaction);
+      await queryRunner.commitTransaction();
+
+      return {
+        success: true,
+        transaction,
+        previousBalance: balance,
+        remainingBalance: newBalance,
+        overdraftUsed: newBalance < 0 ? Math.abs(newBalance) : 0,
+      };
+
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      const err = error as any;
+      const isDuplicate = err.code === '23505' || err.code === 'ER_DUP_ENTRY' || err.errno === 1062;
+      const errorMessage = err.message || err.sqlMessage || '';
+      
+      if (isDuplicate && (err.constraint?.includes('qrJti') || errorMessage.includes('qrJti'))) {
+        throw new ConflictException('QR Code déjà utilisé');
+      }
+      if (err.code === '40001') {
+        throw new ConflictException('Erreur de concurrence, veuillez réessayer (Serialization Failure)');
+      }
+      throw error;
     } finally {
-      await queryRunner.release(); 
+      await queryRunner.release();
     }
   }
 
   async getBalance(userId: number) {
-
     const creditsResult = await this.transactionRepo
-      .createQueryBuilder("t")
-      .select("SUM(t.amount)", "total")
-      .where("t.userId = :userId AND t.partnerId IS NULL", { userId })
+      .createQueryBuilder('t')
+      .select('SUM(t.amount)', 'total')
+      .where('t.userId = :userId', { userId })
+      .andWhere('t.type = :type', { type: TransactionType.CREDIT })
       .getRawOne();
 
     const debitsResult = await this.transactionRepo
-      .createQueryBuilder("t")
-      .select("SUM(t.amount)", "total")
-      .where("t.userId = :userId AND t.partnerId IS NOT NULL", { userId })
+      .createQueryBuilder('t')
+      .select('SUM(t.amount)', 'total')
+      .where('t.userId = :userId', { userId })
+      .andWhere('t.type = :type', { type: TransactionType.DEBIT })
       .getRawOne();
 
-    const totalCredits = creditsResult.total ? parseFloat(creditsResult.total) : 0;
-    const totalDebits = debitsResult.total ? parseFloat(debitsResult.total) : 0;
+    const credits = Number(creditsResult.total ?? 0);
+    const debits = Number(debitsResult.total ?? 0);
 
-    return { balance: totalCredits - totalDebits };
+    return {
+      balance: credits - debits,
+    };
   }
 
   async getHistory(userId: number) {
-    return await this.transactionRepo.find({
+    const transactions = await this.transactionRepo.find({
       where: { userId: userId },
-      order: { id: 'DESC' }
+      order: { createdAt: 'DESC' },
+      relations: { partner: true },
     });
+
+    let runningBalance = (await this.getBalance(userId)).balance;
+
+    const result = transactions.map(t => {
+      const balanceAfter = runningBalance;
+      if (t.type === TransactionType.CREDIT) {
+        runningBalance -= Number(t.amount);
+      } else {
+        runningBalance += Number(t.amount);
+      }
+      
+      return {
+        ...t,
+        balanceAfter,
+      };
+    });
+
+    return result;
   }
 
   getQrCode(userId: number) {
-    const payload = { sub: userId, purpose: 'payment_qrcode' };
-    const token = this.jwtService.sign(payload, { expiresIn: '5m' });
+    const payload = { sub: userId, purpose: 'payment_qrcode', jti: randomUUID() };
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
     return { code: token };
-  }
-
-  async create(userId: number, amount: number, partnerId: number) {
-    const newTransaction = this.transactionRepo.create({
-      userId: userId,
-      amount: amount,
-      partnerId: partnerId,
-    });
-
-    await this.transactionRepo.save(newTransaction);
-
-    return {
-      success: true,
-      message: `Transaction ${amount} stocked`,
-      data: newTransaction
-    };
   }
 
   async addFunds(userId: number, amount: number) {
     if (amount <= 0) {
-      throw new BadRequestException("Le montant doit être positif");
+      throw new BadRequestException('Le montant doit être positif');
     }
 
-    const newTransaction = this.transactionRepo.create({
-      userId: userId,
-      amount: amount,
+    const transaction = this.transactionRepo.create({
+      userId,
+      amount,
+      type: TransactionType.CREDIT,
+      partnerId: null,
     });
 
-    await this.transactionRepo.save(newTransaction);
+    await this.transactionRepo.save(transaction);
+
+    const { balance } = await this.getBalance(userId);
 
     return {
       success: true,
-      message: `Compte du user ${userId} rechargé de ${amount}€`,
-      transaction: newTransaction
+      transaction,
+      balance,
     };
   }
 }

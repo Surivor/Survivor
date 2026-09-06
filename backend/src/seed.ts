@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { DataSource } from 'typeorm';
 import { User } from './users/user.entity';
 import { Partner } from './partners/partner.entity';
-import { Transaction } from './transactions/entities/transaction.entity'; 
+import { Transaction, TransactionType } from './transactions/entities/transaction.entity'; 
 import * as fs from 'fs';
 import * as bcrypt from 'bcrypt';
 async function bootstrap() {
@@ -116,6 +116,15 @@ async function bootstrap() {
       });
       
       const savedUser = await userRepository.save(employee);
+      
+      const initialCredit = transactionRepository.create({
+        userId: savedUser.id,
+        amount: 150,
+        type: TransactionType.CREDIT,
+        idempotencyKey: `credit-init-${savedUser.id}`,
+      });
+      await transactionRepository.save(initialCredit);
+
       savedEmployees.push({ dbUser: savedUser, targetProfile: e.targetProfile });
     }
   
@@ -129,10 +138,23 @@ async function bootstrap() {
       const txDate = new Date(referenceDate + i * 1000 * 60 * 60 * 24);
       const status = i < 5 ? 'refused' : 'validated';
       const amountCents = 1500;
+      const amount = amountCents / 100;
   
       csvContent += `${txId};${txDate.toISOString()};${emp.dbUser.id};${part.id};${amountCents};${status}\n`;
-      txId++;
       
+      if (status === 'validated') {
+        const debit = transactionRepository.create({
+          userId: emp.dbUser.id,
+          partnerId: part.id,
+          amount: amount,
+          type: TransactionType.DEBIT,
+          idempotencyKey: `tx-debit-${txId}`,
+          createdAt: txDate,
+        });
+        await transactionRepository.save(debit);
+      }
+      
+      txId++;
     }
   
     fs.writeFileSync('transactions.csv', csvContent, 'utf8');
