@@ -14,16 +14,10 @@ type UserProfile = {
   status: string;
 };
 
-type BalanceState = {
-  available: number;
-  used: number;
-  limit: number;
-};
-
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [balance, setBalance] = useState<BalanceState>({ available: 0, used: 0, limit: 300 });
+  const [balance, setBalance] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -70,11 +64,7 @@ export default function ProfilePage() {
         if (balanceRes.ok) {
           const bData = await safeJson(balanceRes);
           if (bData) {
-            setBalance({
-              available: bData.balance || 0,
-              used: 300 - (bData.balance || 0),
-              limit: 300
-            });
+            setBalance(bData.balance || 0);
           }
         }
       } catch (err) {
@@ -126,7 +116,7 @@ export default function ProfilePage() {
             <p><span className="font-semibold">Statut :</span> {user.status}</p>
           </div>
 
-          <BalanceCard balance={balance.available} used={balance.used} limit={balance.limit} />
+          <BalanceCard balance={balance} />
         </div>
       </div>
     </>

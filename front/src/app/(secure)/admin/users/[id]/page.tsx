@@ -68,9 +68,6 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
             setMessage("Le compte a été validé avec succès.");
             if (userData) setUserData({ ...userData, isVerified: true });
 
-            setTimeout(() => {
-                router.push("/admin");
-            }, 2000);
 
         } catch (error: any) {
             setMessage(error.message);

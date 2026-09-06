@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { DataSource } from 'typeorm';
 import { User } from './users/user.entity';
 import { Partner } from './partners/partner.entity';
-import { Transaction } from './transactions/entities/transaction.entity'; 
+import { Transaction, TransactionType } from './transactions/entities/transaction.entity'; 
 import * as fs from 'fs';
 import * as bcrypt from 'bcrypt';
 async function bootstrap() {
@@ -25,6 +25,8 @@ async function bootstrap() {
     const adminEmail = process.env.ADMIN_EMAIL || 'ministre@survivor.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'SuperAdminPassword123!';
     const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
+
+    const hashedDefaultPassword = await bcrypt.hash('securepassword', 10);
 
     const adminUser = userRepository.create({
       name: 'Ministre',
@@ -77,17 +79,17 @@ async function bootstrap() {
         firstName,
         lastName: lastNames[index],
         email: `${firstName.toLowerCase()}.${lastNames[index].toLowerCase()}@entreprise.fr`,
-        password: 'securepassword',
+        password: hashedDefaultPassword,
         targetProfile, 
       };
     });
   
-    const savedPartners = [];
+    const savedPartners: User[] = [];
     for (const p of partnersData) {
       const user = userRepository.create({
         name: p.name,
         email: `${p.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@jeb.fr`,
-        password: 'securepassword',
+        password: hashedDefaultPassword,
         status: 'partenaire',
         isVerified: true,
       });
@@ -103,7 +105,7 @@ async function bootstrap() {
       savedPartners.push(savedUser);
     }
   
-    const savedEmployees = [];
+    const savedEmployees: User[] = [];
     for (const e of employeesData) {
       const employee = userRepository.create({
         name: `${e.firstName} ${e.lastName}`,
@@ -114,23 +116,76 @@ async function bootstrap() {
       });
       
       const savedUser = await userRepository.save(employee);
-      savedEmployees.push({ dbUser: savedUser, targetProfile: e.targetProfile });
+      savedEmployees.push(savedUser);
     }
   
-    const referenceDate = new Date('2026-06-01T00:00:00Z').getTime();
+    const referenceDate = new Date('2025-06-01T00:00:00Z').getTime();
     let csvContent = 'id;date_iso8601;employee_id;partner_id;amount_cents;status\n';
-  
     let txId = 1;
-    for (let i = 0; i < 200; i++) {
-      const emp = savedEmployees[i % 50]; 
+
+    const setupUserBalance = async (user: User, creditAmount: number, debitAmount: number) => {
+        if (creditAmount > 0) {
+            const txDate = new Date(referenceDate - 1000 * 60 * 60 * 24 * 10);
+            const credit = transactionRepository.create({
+                userId: user.id,
+                amount: creditAmount,
+                type: TransactionType.CREDIT,
+                idempotencyKey: `credit-init-${user.id}`,
+                createdAt: txDate,
+            });
+            await transactionRepository.save(credit);
+        }
+        if (debitAmount > 0) {
+            const part = savedPartners[txId % 12];
+            const txDate = new Date(referenceDate + txId * 1000 * 60 * 60 * 24);
+            const debit = transactionRepository.create({
+                userId: user.id,
+                partnerId: part.id,
+                amount: debitAmount,
+                type: TransactionType.DEBIT,
+                idempotencyKey: `tx-debit-${txId}`,
+                createdAt: txDate,
+            });
+            await transactionRepository.save(debit);
+            csvContent += `${txId};${txDate.toISOString()};${user.id};${part.id};${debitAmount * 100};validated\n`;
+            txId++;
+        }
+    };
+
+    await setupUserBalance(savedEmployees[0], 100, 100);
+    await setupUserBalance(savedEmployees[1], 100, 95);
+    await setupUserBalance(savedEmployees[2], 100, 140);
+    await setupUserBalance(savedEmployees[3], 0, 140);
+    await setupUserBalance(savedEmployees[4], 0, 150);
+    await setupUserBalance(savedEmployees[5], 200, 50);
+
+    for (let i = 6; i < savedEmployees.length; i++) {
+        const emp = savedEmployees[i];
+        await setupUserBalance(emp, 150, 0);
+    }
+
+    for (let i = 0; i < 150; i++) {
+      const emp = savedEmployees[6 + (i % 44)]; 
       const part = savedPartners[i % 12]; 
       const txDate = new Date(referenceDate + i * 1000 * 60 * 60 * 24);
       const status = i < 5 ? 'refused' : 'validated';
-      const amountCents = 1500;
+      const amount = 15;
   
-      csvContent += `${txId};${txDate.toISOString()};${emp.dbUser.id};${part.id};${amountCents};${status}\n`;
-      txId++;
+      csvContent += `${txId};${txDate.toISOString()};${emp.id};${part.id};${amount * 100};${status}\n`;
       
+      if (status === 'validated') {
+        const debit = transactionRepository.create({
+          userId: emp.id,
+          partnerId: part.id,
+          amount: amount,
+          type: TransactionType.DEBIT,
+          idempotencyKey: `tx-debit-${txId}`,
+          createdAt: txDate,
+        });
+        await transactionRepository.save(debit);
+      }
+      
+      txId++;
     }
   
     fs.writeFileSync('transactions.csv', csvContent, 'utf8');

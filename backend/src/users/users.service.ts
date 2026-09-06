@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, ConflictException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,6 +12,38 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
+
+  async findAllAdmin(search?: string, status?: string, isVerified?: string): Promise<User[]> {
+    const whereConditions: any[] = [];
+    const verifiedFilter = isVerified !== undefined ? { isVerified: isVerified === 'true' } : {};
+
+    if (search) {
+      const query = `%${search}%`;
+      whereConditions.push(
+        { name: ILike(query), ...(status ? { status } : {}), ...verifiedFilter },
+        { email: ILike(query), ...(status ? { status } : {}), ...verifiedFilter },
+      );
+    } else {
+      const condition: any = { ...verifiedFilter };
+      if (status) condition.status = status;
+      if (Object.keys(condition).length > 0) {
+        whereConditions.push(condition);
+      }
+    }
+
+    return this.usersRepository.find({
+      where: whereConditions.length > 0 ? whereConditions : {},
+      order: { id: 'ASC' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        status: true,
+        isVerified: true,
+        isAdmin: true,
+      },
+    });
+  }
 
   findAll(): Promise<User[]> {
     return this.usersRepository.find();
@@ -41,9 +73,9 @@ export class UsersService {
     }
 
     const existingUser = await this.findByEmail(email.trim());
-      if (existingUser) {
+    if (existingUser) {
       throw new ConflictException(`L'adresse email ${email} est déjà utilisée.`);
-  }
+    }
 
     const hashedPassword = password ? await bcrypt.hash(password, 10) : '';
 
@@ -141,6 +173,14 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    const countResult = await this.usersRepository.query(
+      'SELECT COUNT(*) as cnt FROM transactions WHERE userId = ? OR partnerId = ?',
+      [id, id]
+    );
+    const count = parseInt(countResult[0].cnt, 10);
+    if (count > 0) {
+      throw new BadRequestException('Impossible de supprimer un utilisateur possédant un historique de transactions. Suspendez-le à la place.');
     }
     await this.usersRepository.remove(user);
   }

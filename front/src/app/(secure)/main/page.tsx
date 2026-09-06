@@ -7,11 +7,21 @@ import QrCodeCard from "@/components/QrCodeCard";
 import Header from "@/components/Header";
 import HistoryMain from "@/components/History_main";
 import Partener_main from "@/components/Partener_main";
+import FeaturedPartnerCard from "@/components/FeaturedPartnerCard";
+
+type Transaction = {
+    id: number;
+    type: 'credit' | 'debit';
+    amount: number;
+    createdAt: string;
+    partner?: { name: string };
+    balanceAfter: number;
+};
 
 export default function MainPage() {
-    const [balance, setBalance] = useState({ available: 0, used: 0, limit: 300 });
-    const [transactions, setTransactions] = useState([]);
-    const [partners, setPartners] = useState([]);
+    const [balance, setBalance] = useState(0);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [partners, setPartners] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -36,11 +46,7 @@ export default function MainPage() {
                 if (balanceRes.ok) {
                     const bData = await safeJson(balanceRes);
                     if (bData) {
-                        setBalance({
-                            available: bData.balance || 0,
-                            used: 300 - (bData.balance || 0),
-                            limit: 300
-                        });
+                        setBalance(bData.balance || 0);
                     }
                 }
 
@@ -63,6 +69,8 @@ export default function MainPage() {
         fetchDashboardData();
     }, []);
 
+    const featuredPartner = partners.find(p => p.featured === true);
+
     if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-zinc-50">
@@ -76,9 +84,9 @@ export default function MainPage() {
             <Header />
             <div className="flex min-h-screen flex-col items-center gap-8 bg-zinc-50 px-4 pt-8">
                 <div className="w-full max-w-5xl flex flex-col items-center gap-8">
-                    {}
-                    <BalanceCard balance={balance.available} used={balance.used} limit={balance.limit} />
+                    <BalanceCard balance={balance} />
                     <QrCodeCard />
+                    {featuredPartner && <FeaturedPartnerCard partner={featuredPartner} />}
                     <div className="flex flex-col md:flex-row items-start gap-4 md:gap-2.5 w-full">
                         <HistoryMain transactions={transactions} />
                         <Partener_main partners={partners} />

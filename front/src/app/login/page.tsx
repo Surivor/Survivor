@@ -9,14 +9,14 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
     setLoading(true)
 
     const formData = new FormData(event.currentTarget)
-    const email = formData.get('email')
-    const password = formData.get('password')
+    const email = (formData.get('email') as string)?.trim()
+    const password = (formData.get('password') as string)?.trim()
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -42,7 +42,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 rounded-2xl">
+      <form onSubmit={handleSubmit} noValidate className="w-full max-w-sm space-y-4 rounded-2xl">
         <h1 className="text-center text-2xl font-bold font-title text-primary">Ticket Tout</h1>
         <p className="text-center text-sm text-primary">Connectez-vous à votre espace</p>
 
