@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Req, Res, UseGuards, UnauthorizedException
 import type { Request, Response } from 'express';
 import { TransactionsService } from './transactions.service';
 import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '../auth/admin.guard';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import * as fs from 'fs';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
@@ -75,6 +76,14 @@ export class TransactionsController {
     
     const partnerId = (req as any).user.userId;
     return this.transactionsService.processPayment(body.qrCodeToken, body.amount, partnerId, idempotencyKey);
+  }
+
+  @ApiOperation({ summary: 'Retrieve all transactions for admin' })
+  @ApiResponse({ status: 200, description: 'Returns an array of all transactions with user and partner details.' })
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Get('admin/all')
+  getAllAdmin() {
+    return this.transactionsService.getAllAdmin();
   }
 
   @Post('admin/fund')

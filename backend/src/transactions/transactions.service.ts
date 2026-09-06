@@ -257,6 +257,33 @@ export class TransactionsService {
     }));
   }
 
+  async getAllAdmin() {
+    const transactions = await this.transactionRepo.find({
+      order: { createdAt: 'DESC' },
+      relations: {
+        user: true,
+        partner: { user: true },
+      },
+    });
+
+    return transactions.map(t => ({
+      id: t.id,
+      amount: t.amount,
+      createdAt: t.createdAt,
+      type: t.type,
+      user: t.user ? {
+        id: t.user.id,
+        name: t.user.name,
+        firstname: t.user.firstname,
+        email: t.user.email,
+      } : null,
+      partner: t.partner ? {
+        id: t.partner.id,
+        name: t.partner.user?.name || 'Partenaire Inconnu',
+      } : null,
+    }));
+  }
+
   getQrCode(userId: number) {
     const payload = { sub: userId, purpose: 'payment_qrcode', jti: randomUUID() };
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
