@@ -199,7 +199,7 @@ export class TransactionsService {
     const transactions = await this.transactionRepo.find({
       where: { userId: userId },
       order: { createdAt: 'DESC' },
-      relations: { partner: true },
+      relations: { partner: { user: true } },
     });
 
     let runningBalance = (await this.getBalance(userId)).balance;
@@ -212,9 +212,22 @@ export class TransactionsService {
         runningBalance += Number(t.amount);
       }
       
+      const partnerData = t.partner ? {
+        id: t.partner.id,
+        name: t.partner.user?.name || 'Partenaire Inconnu'
+      } : undefined;
+
       return {
-        ...t,
+        id: t.id,
+        type: t.type,
+        amount: t.amount,
+        createdAt: t.createdAt,
+        userId: t.userId,
+        partnerId: t.partnerId,
+        qrJti: t.qrJti,
+        idempotencyKey: t.idempotencyKey,
         balanceAfter,
+        partner: partnerData,
       };
     });
 

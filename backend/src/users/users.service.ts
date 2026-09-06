@@ -174,6 +174,14 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+    const countResult = await this.usersRepository.query(
+      'SELECT COUNT(*) as cnt FROM transactions WHERE userId = ? OR partnerId = ?',
+      [id, id]
+    );
+    const count = parseInt(countResult[0].cnt, 10);
+    if (count > 0) {
+      throw new BadRequestException('Impossible de supprimer un utilisateur possédant un historique de transactions. Suspendez-le à la place.');
+    }
     await this.usersRepository.remove(user);
   }
 }

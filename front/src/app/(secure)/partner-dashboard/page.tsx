@@ -74,6 +74,7 @@ export default function PartnerDashboardPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "x-idempotency-key": crypto.randomUUID(),
         },
         body: JSON.stringify({
           qrCodeToken: qrInput.trim(),
