@@ -119,17 +119,19 @@ async function bootstrap() {
       savedEmployees.push(savedUser);
     }
   
-    const referenceDate = new Date('2026-06-01T00:00:00Z').getTime();
+    const referenceDate = new Date('2025-06-01T00:00:00Z').getTime();
     let csvContent = 'id;date_iso8601;employee_id;partner_id;amount_cents;status\n';
     let txId = 1;
 
     const setupUserBalance = async (user: User, creditAmount: number, debitAmount: number) => {
         if (creditAmount > 0) {
+            const txDate = new Date(referenceDate - 1000 * 60 * 60 * 24 * 10);
             const credit = transactionRepository.create({
                 userId: user.id,
                 amount: creditAmount,
                 type: TransactionType.CREDIT,
                 idempotencyKey: `credit-init-${user.id}`,
+                createdAt: txDate,
             });
             await transactionRepository.save(credit);
         }

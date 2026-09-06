@@ -43,6 +43,15 @@ export class PartnersController {
         return this.partnersService.getVerified();
     }
 
+    @ApiOperation({ summary: 'Retrieve all past featured partners' })
+    @ApiResponse({ status: 200, description: 'Returns list of all previously featured partners' })
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard('jwt'), AdminGuard)
+    @Get('past-featured')
+    getPastFeatured() {
+        return this.partnersService.getPastFeatured();
+    }
+
     @ApiOperation({ summary: 'Get a partner by ID' })
     @ApiParam({ name: 'id', description: 'The ID of the partner', type: 'string' })
     @ApiResponse({ status: 200, description: 'Returns the partner details.' })

@@ -58,6 +58,17 @@ export class PartnersService {
 	});
     }
 
+    async getPastFeatured(): Promise<Partner[]> {
+        const { Not, IsNull } = require('typeorm');
+        return this.partnersRepository.find({
+            where: [
+                { featured: false, unfeaturedAt: Not(IsNull()) },
+                { featured: false, featuredAt: Not(IsNull()) }
+            ],
+            relations: { user: true },
+        });
+    }
+
     /** create a user & partner entry in the db */
     async create(partnerData: CreatePartnerDto): Promise<Partial<Partner>> {
 

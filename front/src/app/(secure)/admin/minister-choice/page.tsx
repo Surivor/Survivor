@@ -21,15 +21,18 @@ export default function MinisterChoicePage() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"all" | "history">("all");
   
   const [loadingPartners, setLoadingPartners] = useState<Set<number>>(new Set());
   const [animatingPartners, setAnimatingPartners] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const fetchPartners = async () => {
+      setLoading(true);
       try {
         const token = getToken();
-        const res = await fetch("/api/partners/verified", {
+        const endpoint = viewMode === "history" ? "/api/partners/past-featured" : "/api/partners/verified";
+        const res = await fetch(endpoint, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
 
@@ -45,7 +48,7 @@ export default function MinisterChoicePage() {
     };
 
     fetchPartners();
-  }, []);
+  }, [viewMode]);
 
   const handleToggleFeatured = async (partnerId: number, currentState: boolean) => {
     if (loadingPartners.has(partnerId)) return;
@@ -54,15 +57,22 @@ export default function MinisterChoicePage() {
     
     const previousPartners = [...partners];
 
-    setPartners(current => current.map(p => {
-      if (p.id === partnerId) {
-        return { ...p, featured: newState };
+    setPartners(current => {
+      if (viewMode === "history" && newState) {
+        // If we are in history view and we 'like' a partner, it shouldn't disappear immediately for better UX,
+        // but we still update its state.
+        return current.map(p => p.id === partnerId ? { ...p, featured: newState } : p);
       }
-      if (newState && p.featured) {
-        return { ...p, featured: false };
-      }
-      return p;
-    }));
+      return current.map(p => {
+        if (p.id === partnerId) {
+          return { ...p, featured: newState };
+        }
+        if (newState && p.featured) {
+          return { ...p, featured: false };
+        }
+        return p;
+      });
+    });
 
     if (newState) {
         setAnimatingPartners(prev => new Set(prev).add(partnerId));
@@ -139,6 +149,25 @@ export default function MinisterChoicePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
+          </div>
+
+          <div className="flex gap-4 border-b border-zinc-200 pb-2">
+            <button
+              onClick={() => setViewMode("all")}
+              className={`font-semibold text-lg px-4 py-2 transition-colors ${
+                viewMode === "all" ? "text-primary border-b-2 border-primary" : "text-zinc-400 hover:text-zinc-600"
+              }`}
+            >
+              Tous les partenaires
+            </button>
+            <button
+              onClick={() => setViewMode("history")}
+              className={`font-semibold text-lg px-4 py-2 transition-colors ${
+                viewMode === "history" ? "text-primary border-b-2 border-primary" : "text-zinc-400 hover:text-zinc-600"
+              }`}
+            >
+              Historique des Likes
+            </button>
           </div>
 
           {loading ? (
