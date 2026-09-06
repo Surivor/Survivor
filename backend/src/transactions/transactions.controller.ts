@@ -30,6 +30,15 @@ export class TransactionsController {
     const userId = (req as any).user.userId;
     return this.transactionsService.getHistory(userId);
   }
+
+  @ApiOperation({ summary: 'Retrieve partner transaction history' })
+  @ApiResponse({ status: 200, description: 'Returns an array of past debit transactions for the authenticated partner.' })
+  @UseGuards(AuthGuard('jwt'))
+  @Get('partner/history')
+  getPartnerHistory(@Req() req: Request) {
+    const userId = (req as any).user.userId;
+    return this.transactionsService.getPartnerHistory(userId);
+  }
   @ApiOperation({ summary: 'Generate temporary QR Code token' })
   @ApiResponse({ status: 200, description: 'Returns a 30-minute valid JWT meant to be scanned by a partner.' })
   @ApiResponse({ status: 401, description: 'Unauthorized if the employee session token is missing or invalid.' })

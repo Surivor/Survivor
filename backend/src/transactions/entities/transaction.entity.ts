@@ -16,14 +16,14 @@ export class Transaction {
     @Column()
     userId: number;
 
-    @ManyToOne(() => User, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User)
     @JoinColumn({ name: 'userId' })
     user: User;
 
     @Column({ nullable: true })
     partnerId?: number | null;
 
-    @ManyToOne(() => Partner, { nullable: true, onDelete: 'SET NULL' })
+    @ManyToOne(() => Partner, { nullable: true })
     @JoinColumn({ name: 'partnerId' })
     partner?: Partner | null;
 

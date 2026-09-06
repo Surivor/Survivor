@@ -36,7 +36,7 @@ export default function PartnerDashboardPage() {
 
   async function loadHistory() {
     try {
-      const res = await fetch("/api/transactions/history", {
+      const res = await fetch("/api/transactions/partner/history", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) {

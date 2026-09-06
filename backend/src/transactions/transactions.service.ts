@@ -137,16 +137,36 @@ export class TransactionsService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       const err = error as any;
+
+      if (err instanceof BadRequestException || err instanceof UnauthorizedException || err instanceof ConflictException) {
+        throw err;
+      }
+
       const isDuplicate = err.code === '23505' || err.code === 'ER_DUP_ENTRY' || err.errno === 1062;
       const errorMessage = err.message || err.sqlMessage || '';
       
       if (isDuplicate && (err.constraint?.includes('qrJti') || errorMessage.includes('qrJti'))) {
-        throw new ConflictException('QR Code déjà utilisé');
+        throw new BadRequestException('QR Code déjà utilisé');
       }
-      if (err.code === '40001') {
-        throw new ConflictException('Erreur de concurrence, veuillez réessayer (Serialization Failure)');
+
+      if (isDuplicate && (err.constraint?.includes('idempotencyKey') || errorMessage.includes('idempotencyKey'))) {
+        const existingTx = await this.transactionRepo.findOne({ where: { idempotencyKey } });
+        if (existingTx) {
+            return {
+                success: true,
+                message: 'Transaction déjà traitée',
+                transaction: existingTx,
+            };
+        }
+        throw new ConflictException('Erreur de traitement de la requête');
       }
-      throw error;
+
+      const isDeadlock = err.code === '40001' || err.code === 'ER_LOCK_DEADLOCK' || err.errno === 1213 || err.code === 'ER_LOCK_WAIT_TIMEOUT' || err.errno === 1205;
+      if (isDeadlock) {
+        throw new ConflictException('Erreur de concurrence, veuillez réessayer');
+      }
+
+      throw new BadRequestException('Erreur interne lors du traitement de la transaction');
     } finally {
       await queryRunner.release();
     }
@@ -199,6 +219,29 @@ export class TransactionsService {
     });
 
     return result;
+  }
+
+  async getPartnerHistory(userId: number) {
+    const partner = await this.transactionRepo.manager.findOne(Partner, {
+      where: { id: userId },
+    });
+
+    if (!partner || !partner.verified) {
+      throw new BadRequestException('Partenaire invalide ou non vérifié');
+    }
+
+    const transactions = await this.transactionRepo.find({
+      where: { partnerId: partner.id, type: TransactionType.DEBIT },
+      order: { createdAt: 'DESC' },
+    });
+
+    return transactions.map(t => ({
+      id: t.id,
+      amount: t.amount,
+      createdAt: t.createdAt,
+      type: t.type,
+      userId: t.userId,
+    }));
   }
 
   getQrCode(userId: number) {
