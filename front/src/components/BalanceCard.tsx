@@ -20,7 +20,7 @@ export default function BalanceCard({ balance }: BalanceCardProps) {
     <>
       <div className="w-full rounded-[28px] bg-primary p-6 text-white shadow-md sm:p-8">
         <p className="mb-3 text-[16px] font-normal text-white/90">
-          {isNegative ? "Solde Ticket Tout" : "Solde disponible"}
+          {isNegative ? "Solde Carte Pro" : "Solde disponible"}
         </p>
         <h2 className="mb-8 text-[3.4rem] font-bold font-title">
           {formatEuro(balance).replace(" €", " €")}
@@ -29,7 +29,7 @@ export default function BalanceCard({ balance }: BalanceCardProps) {
         {isNegative && (
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-[15px] text-white/90">Avance Ticket Tout utilisée</p>
+              <p className="text-[15px] text-white/90">Avance Carte Pro utilisée</p>
               <p className="text-[15px] text-white/90">
                 {used} € / {limit} €
               </p>

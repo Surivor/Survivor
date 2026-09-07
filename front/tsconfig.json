@@ -38,6 +38,6 @@
   "exclude": [
     "node_modules",
     ".next",
-    "Ticket Tout/node_modules"
+    "Carte Pro/node_modules"
   ]
 }

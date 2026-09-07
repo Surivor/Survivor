@@ -4,7 +4,7 @@ import FeaturedPartnerSection from "@/components/FeaturedPartnerSection";
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-zinc-50 px-4">
-      <h1 className="text-3xl font-bold font-title text-primary">Ticket Tout</h1>
+      <h1 className="text-3xl font-bold font-title text-primary">Carte Pro</h1>
 
       <div className="flex w-full max-w-2xl flex-col gap-6 sm:flex-row">
         <Link

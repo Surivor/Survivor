@@ -62,7 +62,7 @@ export default function HistoryMain({ transactions = [] }: { transactions: Trans
                             </p>
                             {entersOverdraft && (
                                 <p className="text-sm font-semibold text-accent-cyan mt-1">
-                                    Début de votre avance Ticket Tout
+                                    Début de votre avance Carte Pro
                                 </p>
                             )}
                         </div>
