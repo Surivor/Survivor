@@ -93,7 +93,7 @@ export class TransactionsController {
     @Headers('x-api-key') apiKey: string,
   ) {
     if (!apiKey || apiKey !== process.env.PASS_ADD) {
-      throw new UnauthorizedException("Clé API invalide ou manquante");
+      throw new UnauthorizedException("Invalid or missing API key");
     }
 
     return this.transactionsService.addFunds(userId, amount);

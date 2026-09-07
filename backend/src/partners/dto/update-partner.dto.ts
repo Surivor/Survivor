@@ -15,7 +15,7 @@ export class UpdatePartnerDto {
         description: 'The updated registered social purpose or business sector'
     })
     @IsString()
-    @IsNotEmpty({ message: 'Object Social Required' })
+    @IsNotEmpty({ message: 'Objet Social Required' })
     objet_social: string;
 
     @ApiPropertyOptional({
