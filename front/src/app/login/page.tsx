@@ -43,7 +43,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
       <form onSubmit={handleSubmit} noValidate className="w-full max-w-sm space-y-4 rounded-2xl">
-        <h1 className="text-center text-2xl font-bold font-title text-primary">Ticket Tout</h1>
+        <h1 className="text-center text-2xl font-bold font-title text-primary">Carte Pro</h1>
         <p className="text-center text-sm text-primary">Connectez-vous à votre espace</p>
 
         <input type="email" name="email" placeholder="Email" required

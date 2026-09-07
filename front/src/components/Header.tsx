@@ -41,7 +41,7 @@ export default function Header() {
                             style={{ width: "auto", height: "auto" }}
                         />
                         <div className="hidden sm:block h-6 w-[1px] bg-zinc-300" />
-                        <h3 className="text-lg sm:text-xl font-bold font-title text-primary">Ticket Tout</h3>
+                        <h3 className="text-lg sm:text-xl font-bold font-title text-primary">Carte Pro</h3>
                     </Link>
 
                     <nav className="hidden lg:flex items-center gap-6 pl-6 border-l border-zinc-200">

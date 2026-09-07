@@ -20,7 +20,7 @@ const spectral = Spectral({
 });
 
 export const metadata: Metadata = {
-  title: 'Ticket Tout',
+  title: 'Carte Pro',
   description: 'Gérez vos avantages collaborateurs simplement.',
 };
 

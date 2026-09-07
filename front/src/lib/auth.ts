@@ -1,4 +1,4 @@
-const TOKEN_KEY = "Ticket_tout_token";
+const TOKEN_KEY = "Carte-Pro_token";
 
 export function saveToken(token: string) {
   localStorage.setItem(TOKEN_KEY, token);
