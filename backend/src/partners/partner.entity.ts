@@ -14,14 +14,18 @@ export class Partner {
 
     //pastille du gouv
     @Column({ default: false })
-    verified: boolean
+    verified: boolean;
 
-    //government favorites (featured on main page)
     @Column({ default: false })
-    featured: boolean
+    featured: boolean;
+
+    @Column({ type: 'timestamp', nullable: true })
+    featuredAt?: Date | null;
+
+    @Column({ type: 'timestamp', nullable: true })
+    unfeaturedAt?: Date | null;
 
     @OneToOne(() => User)
     @JoinColumn({ name: 'id' })
     user: User;
 }
-

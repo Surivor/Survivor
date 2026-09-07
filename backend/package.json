@@ -6,6 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "seed": "docker compose up -d && docker compose exec backend npm run seed:run",
+    "seed:run": "ts-node -r tsconfig-paths/register src/seed.ts",
     "build": "nest build",
     "deploy": "nest deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

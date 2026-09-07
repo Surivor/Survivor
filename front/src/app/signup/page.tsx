@@ -9,36 +9,58 @@ export default function SignupPage() {
   const [statut, setStatut] = useState('')
 
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(null)
+  event.preventDefault()
 
-    const formData = new FormData(event.currentTarget)
+  setError(null)
 
-    const body: Record<string, FormDataEntryValue | null> = {
+  const formData = new FormData(event.currentTarget)
+
+  let url = '/api/auth/register'
+  let body: Record<string, unknown>
+
+  if (statut === 'partenaire') {
+    url = '/api/partners'
+
+    body = {
+      userdto: {
+        name: formData.get('companyName'),
+        firstname: formData.get('prenom'),
+        status: 'partenaire',
+        email: formData.get('email'),
+        password: formData.get('password'),
+      },
+      siren: Number(formData.get('siren')),
+      objet_social: formData.get('businessPurpose'),
+    }
+  } else {
+    body = {
       name: formData.get('nom'),
       firstname: formData.get('prenom'),
-      status: formData.get('statut'),
+      status: 'user',
       email: formData.get('email'),
       password: formData.get('password'),
     }
-    if (statut === 'partenaire') {
-      body.companyName = formData.get('companyName')
-      body.businessPurpose = formData.get('businessPurpose')
-      body.siren = formData.get('siren')
-    }
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-
-    if (response.ok) {
-      router.push('/after_signup')
-    } else {
-      const data = await response.json().catch(() => null)
-      setError(data?.message ?? "Erreur lors de l'inscription")
-    }
   }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (response.ok) {
+    router.push('/after_signup')
+  } else {
+    const data = await response.json().catch(() => null)
+    setError(
+      Array.isArray(data?.message)
+        ? data.message.join(' ')
+        : data?.message ?? "Erreur lors de l'inscription"
+    )
+  }
+}
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">

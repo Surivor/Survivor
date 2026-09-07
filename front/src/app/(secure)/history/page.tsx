@@ -8,9 +8,12 @@ import HistoryMain from "@/components/History_main";
 import SimulationBanner from "@/components/SimulationBanner";
 
 type Transaction = {
-    name?: string;
-    date?: string;
-    amount?: string | number;
+    id: number;
+    type: 'credit' | 'debit';
+    amount: number;
+    createdAt: string;
+    partner?: { name: string };
+    balanceAfter: number;
 };
 
 export default function HistoryPage() {
@@ -58,8 +61,8 @@ export default function HistoryPage() {
         <>
             <Header />
             <div className="flex min-h-screen flex-col items-center gap-8 bg-zinc-50 px-4 pt-8">
-                <SimulationBanner />
                 <div className="w-full max-w-3xl">
+                <SimulationBanner />
                     <h1 className="font-title text-2xl font-bold text-primary mb-6">Historique de paiements</h1>
                     
                     {loading ? (
