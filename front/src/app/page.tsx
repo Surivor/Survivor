@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FeaturedPartnerSection from "@/components/FeaturedPartnerSection";
 
 export default function Home() {
   return (
@@ -26,6 +27,8 @@ export default function Home() {
           </span>
         </Link>
       </div>
+
+      <FeaturedPartnerSection />
     </div>
   );
 }

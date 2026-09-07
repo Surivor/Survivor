@@ -24,6 +24,12 @@ export class User {
   @Column({ default: 'active' })
   status: string;
 
+  @Column({ default: false })
+  isAdmin: boolean;
+
+  @Column({ default: false })
+  isVerified: boolean;
+
   //siren de l'entreprise dans lequelle le user travaille
   //optionnel
   @Column({ default: 0 })
