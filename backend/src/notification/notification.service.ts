@@ -5,11 +5,13 @@ import { NotificationsGateway } from './notification.gateway';
 export class NotificationsService {
   constructor(private readonly gateway: NotificationsGateway) {}
 
-  sendBalanceUpdate(userId: number, newBalance: number) {
+  sendBalanceUpdate(userId: number, newBalance: number, transaction?: any) {
     this.gateway.server
       .to(`user_${userId}`)
-      .emit('balance_update', { newBalance });
-      
-    console.log(`Nouveau solde de ${newBalance}€ envoyé à l'utilisateur ${userId}`);
+      .emit('balance_update', { newBalance, transaction });
+  }
+
+  sendNewUserRegistered(user: any) {
+    this.gateway.server.to('admin_room').emit('new_user_registered', user);
   }
 }

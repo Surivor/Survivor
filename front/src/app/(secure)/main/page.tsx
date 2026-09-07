@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getToken } from "@/lib/auth";
+import { getToken, getUserId } from "@/lib/auth";
+import { io } from "socket.io-client";
 import BalanceCard from "@/components/BalanceCard";
 import QrCodeCard from "@/components/QrCodeCard";
 import Header from "@/components/Header";
@@ -67,6 +68,31 @@ export default function MainPage() {
         };
 
         fetchDashboardData();
+    }, []);
+
+    useEffect(() => {
+        const userId = getUserId();
+        if (!userId) return;
+
+        const backendUrl = window.location.protocol + "//" + window.location.hostname + ":3000";
+        const socket = io(backendUrl, {
+            path: "/socket.io/",
+            query: { userId },
+            transports: ["websocket", "polling"],
+        });
+
+        socket.on("balance_update", (data) => {
+            if (data && typeof data.newBalance === "number") {
+                setBalance(data.newBalance);
+            }
+            if (data && data.transaction) {
+                setTransactions((prev) => [data.transaction, ...prev]);
+            }
+        });
+
+        return () => {
+            socket.disconnect();
+        };
     }, []);
 
     const featuredPartner = partners.find(p => p.featured === true);

@@ -20,7 +20,6 @@ export class TransactionsService {
   ) {}
 
   async processPayment(qrCodeToken: string, amount: number, partnerId: number, idempotencyKey: string) {
-    console.log("process payment");
     if (amount <= 0 || !Number.isFinite(amount)) {
       throw new BadRequestException('Le montant doit être supérieur à 0 et valide');
     }
@@ -68,6 +67,7 @@ export class TransactionsService {
       
       const partner = await queryRunner.manager.findOne(Partner, {
         where: { id: partnerId },
+        relations: { user: true }
       });
       
       if (!partner || !partner.verified) {
@@ -133,7 +133,23 @@ export class TransactionsService {
       await queryRunner.manager.save(transaction);
       await queryRunner.commitTransaction();
 
-      this.notificationsService.sendBalanceUpdate(userId, newBalance);
+      const transactionPayload = {
+        id: transaction.id,
+        type: transaction.type,
+        amount: transaction.amount,
+        createdAt: transaction.createdAt,
+        userId: transaction.userId,
+        partnerId: transaction.partnerId,
+        qrJti: transaction.qrJti,
+        idempotencyKey: transaction.idempotencyKey,
+        balanceAfter: newBalance,
+        partner: {
+          id: partner.id,
+          name: partner.user?.name || 'Partenaire Inconnu'
+        }
+      };
+
+      this.notificationsService.sendBalanceUpdate(userId, newBalance, transactionPayload);
 
       return {
         success: true,
