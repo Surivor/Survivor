@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, removeToken } from "@/lib/auth";
+import { getToken, removeToken, getUserId } from "@/lib/auth";
+import { io } from "socket.io-client";
 import BalanceCard from "@/components/BalanceCard";
 import Header from "@/components/Header";
 
@@ -76,6 +77,28 @@ export default function ProfilePage() {
 
     loadProfile();
   }, [router]);
+
+  useEffect(() => {
+    const userId = getUserId();
+    if (!userId) return;
+
+    const backendUrl = window.location.protocol + "//" + window.location.hostname + ":3000";
+    const socket = io(backendUrl, {
+      path: "/socket.io/",
+      query: { userId },
+      transports: ["websocket", "polling"],
+    });
+
+    socket.on("balance_update", (data) => {
+      if (data && typeof data.newBalance === "number") {
+        setBalance(data.newBalance);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   if (loading) {
     return (

@@ -1,6 +1,6 @@
 // partner service (class used in the API)
 
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 // User
@@ -79,7 +79,6 @@ export class PartnersService {
 	//create user
 	let newUser = await this.usersService.create(partnerData.userdto);
 
-	console.log("new user id: " + newUser.id);
 
 	const newPartner = this.partnersRepository.create({
 	    id: newUser.id,
@@ -89,7 +88,14 @@ export class PartnersService {
 	    featured: partnerData.featured,
 	})
 
-	await this.partnersRepository.save(newPartner)
+	try {
+	    await this.partnersRepository.save(newPartner);
+	} catch (error: any) {
+	    if (error.code === 'ER_DUP_ENTRY') {
+	        throw new ConflictException(`Le partenaire avec ce SIREN existe déjà.`);
+	    }
+	    throw error;
+	}
 
 	return newPartner;
     }
