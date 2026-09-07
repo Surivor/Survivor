@@ -79,13 +79,13 @@ export default function ProfilePage() {
   }, [router]);
 
   useEffect(() => {
-    const userId = getUserId();
-    if (!userId) return;
+    const token = getToken();
+    if (!token) return;
 
     const backendUrl = window.location.protocol + "//" + window.location.hostname + ":3000";
     const socket = io(backendUrl, {
       path: "/socket.io/",
-      query: { userId },
+      auth: { token },
       transports: ["websocket", "polling"],
     });
 

@@ -14,6 +14,24 @@ import { UpdatePartnerDto } from './dto/update-partner.dto';
 
 @Injectable()
 export class PartnersService {
+    private readonly partnerSelect = {
+        id: true,
+        siren: true,
+        objet_social: true,
+        verified: true,
+        featured: true,
+        featuredAt: true,
+        unfeaturedAt: true,
+        user: {
+            id: true,
+            name: true,
+            email: true,
+            firstname: true,
+            status: true,
+            isVerified: true
+        }
+    };
+
     constructor(
 	@InjectRepository(Partner)
 	private partnersRepository: Repository<Partner>,
@@ -23,13 +41,14 @@ export class PartnersService {
     ) {}
 
     findAll(): Promise<Partner[]> {
-	return this.partnersRepository.find({ relations: { user: true } });
+	return this.partnersRepository.find({ relations: { user: true }, select: this.partnerSelect as any });
     }
 
     async findOne(id: number): Promise<Partner> {
 	const partner = await this.partnersRepository.findOne({
 	    where: { id },
 	    relations: { user: true },
+	    select: this.partnerSelect as any,
 	});
 	if (!partner) {
 	    throw new NotFoundException(`Partner with ID ${id} not found`);
@@ -41,6 +60,7 @@ export class PartnersService {
 	return this.partnersRepository.findOne({
 	    where: { siren },
 	    relations: { user: true },
+	    select: this.partnerSelect as any,
 	});
     }
 
@@ -48,6 +68,7 @@ export class PartnersService {
 	return this.partnersRepository.find({
 	    where: { featured: true },
 	    relations: { user: true },
+	    select: this.partnerSelect as any,
 	});
     }
 
@@ -55,6 +76,7 @@ export class PartnersService {
 	return this.partnersRepository.find({
 	    where: { verified: true },
 	    relations: { user: true },
+	    select: this.partnerSelect as any,
 	});
     }
 
@@ -66,6 +88,7 @@ export class PartnersService {
                 { featured: false, featuredAt: Not(IsNull()) }
             ],
             relations: { user: true },
+            select: this.partnerSelect as any,
         });
     }
 

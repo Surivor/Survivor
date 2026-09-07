@@ -59,13 +59,13 @@ export default function AdminUsersList({ resourceType }: AdminUsersListProps) {
   }, [search, status, isVerified]);
 
   useEffect(() => {
-    const adminUserId = getUserId();
-    if (!adminUserId) return;
+    const token = getToken();
+    if (!token) return;
 
     const backendUrl = window.location.protocol + "//" + window.location.hostname + ":3000";
     const socket = io(backendUrl, {
       path: "/socket.io/",
-      query: { userId: adminUserId, isAdmin: "true" },
+      auth: { token },
       transports: ["websocket", "polling"],
     });
 
