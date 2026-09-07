@@ -10,7 +10,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     useEffect(() => {
         const role = getUserRole();
-        console.log(role);
         
         if (role !== "admin") {
             router.push("/main");

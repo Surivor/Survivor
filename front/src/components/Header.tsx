@@ -12,8 +12,6 @@ export default function Header() {
 
     useEffect(() => {
         const role = getUserRole();
-        
-        console.log("Rôle extrait du token :", role);
 
         if (role && typeof role === 'string') {
             const lowerRole = role.toLowerCase();
