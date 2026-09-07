@@ -1,10 +1,10 @@
 @import "../../node_modules/tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --primary: #1B3A6B;
-  --action: #2563eb;
+  --background: #F0EDEE;
+  --foreground: #0A090C;
+  --primary: #2C666E;
+  --action: #90DDF0;
 }
 
 @theme inline {
@@ -28,8 +28,8 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0A090C;
+    --foreground: #F0EDEE;
   }
 }
 
