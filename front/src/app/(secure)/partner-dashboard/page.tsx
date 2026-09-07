@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getToken, removeToken } from "@/lib/auth";
 import Header from "@/components/Header";
@@ -23,8 +23,9 @@ export default function PartnerDashboardPage() {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
   const token = getToken();
+  const [scanning, setScanning] = useState(false);
+  const scannerRef = useRef<any>(null);
 
   useEffect(() => {
     if (!token) {
@@ -33,6 +34,46 @@ export default function PartnerDashboardPage() {
     }
     loadHistory();
   }, []);
+
+  useEffect(() => {
+    if (!scanning) return;
+
+    let isMounted = true;
+
+    async function startScanner() {
+      const { Html5QrcodeScanner } = await import("html5-qrcode");
+
+      if (!isMounted) return;
+
+      const scanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: 250 }, false
+      );
+
+      scanner.render(
+        (decodedText: string) => {
+          setQrInput(decodedText);
+          setSuccess(null);
+          setError(null);
+          setScanning(false);
+        },
+        () => {
+        }
+      );
+
+      scannerRef.current = scanner;
+    }
+
+    startScanner();
+
+    return () => {
+      isMounted = false;
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(() => {});
+        scannerRef.current = null;
+      }
+    };
+  }, [scanning]);
 
   async function loadHistory() {
     try {
@@ -120,6 +161,14 @@ export default function PartnerDashboardPage() {
               Le salarié génère un QR code depuis son espace. Scannez-le ou collez son contenu ci-dessous, puis entrez le montant.
             </p>
 
+            <button
+              type="button"
+              onClick={() => setScanning((prev) => !prev)}
+              className="w-full rounded-lg border border-action py-2 text-sm font-semibold text-action transition-colors hover:bg-action/10"
+            >
+              {scanning ? "Fermer le scanner" : "Scanner un QR code"}
+            </button>
+            {scanning && <div id="reader" className="w-full" />}
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">
