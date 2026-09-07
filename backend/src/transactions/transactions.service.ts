@@ -7,6 +7,7 @@ import { User } from '../users/user.entity';
 import { Partner } from '../partners/partner.entity';
 import { TransactionType } from './entities/transaction.entity';
 import { randomUUID } from 'crypto';
+import { NotificationsService } from '../notification/notification.service';
 
 @Injectable()
 export class TransactionsService {
@@ -14,6 +15,7 @@ export class TransactionsService {
     @InjectRepository(Transaction)
     private transactionRepo: Repository<Transaction>,
     private jwtService: JwtService,
+    private notificationsService: NotificationsService,
     private dataSource: DataSource
   ) {}
 
@@ -45,51 +47,56 @@ export class TransactionsService {
     await queryRunner.connect();
     await queryRunner.startTransaction('SERIALIZABLE');
 
+    
     try {
       const user = await queryRunner.manager
-        .getRepository(User)
-        .createQueryBuilder('user')
-        .setLock('pessimistic_write')
-        .where('user.id = :userId', { userId })
-        .getOne();
-
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .setLock('pessimistic_write')
+      .where('user.id = :userId', { userId })
+      .getOne();
+      
       if (!user) {
         throw new BadRequestException('Utilisateur introuvable');
       }
-
+      
       if (user.status !== 'user' || !user.isVerified) {
         throw new BadRequestException('Le compte n\'est pas un salarié valide');
       }
 
+      
       const partner = await queryRunner.manager.findOne(Partner, {
         where: { id: partnerId },
+        relations: { user: true }
       });
-
+      
       if (!partner || !partner.verified) {
         throw new BadRequestException('Partenaire invalide ou non vérifié');
       }
-
+      
       const existing = await queryRunner.manager.findOne(Transaction, {
         where: { idempotencyKey },
       });
-
+      
+      
       if (existing) {
         await queryRunner.commitTransaction();
+        
         return {
           success: true,
           message: 'Transaction déjà traitée',
           transaction: existing,
         };
       }
-
+      
       const existingQr = await queryRunner.manager.findOne(Transaction, {
         where: { qrJti },
       });
       
       if (existingQr) {
-          throw new ConflictException('QR Code déjà utilisé');
+        throw new ConflictException('QR Code déjà utilisé');
       }
-
+      
       const creditsResult = await queryRunner.manager
         .createQueryBuilder(Transaction, 't')
         .select('COALESCE(SUM(t.amount), 0)', 'total')
@@ -110,8 +117,8 @@ export class TransactionsService {
       const balance = credits - debits;
       const newBalance = balance - amount;
 
-      if (newBalance < -150) {
-        throw new BadRequestException('La limite de découvert de 150€ serait dépassée');
+      if (newBalance < 0) {
+        throw new BadRequestException('La limite de 0€ serait dépassée');
       }
 
       const transaction = queryRunner.manager.create(Transaction, {
@@ -125,6 +132,24 @@ export class TransactionsService {
 
       await queryRunner.manager.save(transaction);
       await queryRunner.commitTransaction();
+
+      const transactionPayload = {
+        id: transaction.id,
+        type: transaction.type,
+        amount: transaction.amount,
+        createdAt: transaction.createdAt,
+        userId: transaction.userId,
+        partnerId: transaction.partnerId,
+        qrJti: transaction.qrJti,
+        idempotencyKey: transaction.idempotencyKey,
+        balanceAfter: newBalance,
+        partner: {
+          id: partner.id,
+          name: partner.user?.name || 'Partenaire Inconnu'
+        }
+      };
+
+      this.notificationsService.sendBalanceUpdate(userId, newBalance, transactionPayload);
 
       return {
         success: true,
@@ -286,7 +311,7 @@ export class TransactionsService {
 
   getQrCode(userId: number) {
     const payload = { sub: userId, purpose: 'payment_qrcode', jti: randomUUID() };
-    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
+    const token = this.jwtService.sign(payload, { expiresIn: '5m' });
     return { code: token };
   }
 

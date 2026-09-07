@@ -7,10 +7,13 @@ import { PassportModule } from '@nestjs/passport';
 import { Transaction } from './entities/transaction.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from '../users/user.entity';
+import { NotificationsModule } from '../notification/notification.module';
+
 
 
 @Module({
   imports: [
+    NotificationsModule,
     PassportModule,
     TypeOrmModule.forFeature([Transaction]),
     User,

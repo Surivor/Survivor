@@ -48,3 +48,16 @@ export function getUserRole(): string | null {
     return null;
   }
 }
+
+export function getUserId(): number | null {
+  const token = getToken();
+  if (!token) return null;
+
+  try {
+    const payload = decodeJwtPayload(token);
+    return payload?.sub || null;
+  } catch (e) {
+    console.error("Erreur de décodage du token", e);
+    return null;
+  }
+}

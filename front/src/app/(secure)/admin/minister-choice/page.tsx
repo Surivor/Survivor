@@ -59,8 +59,6 @@ export default function MinisterChoicePage() {
 
     setPartners(current => {
       if (viewMode === "history" && newState) {
-        // If we are in history view and we 'like' a partner, it shouldn't disappear immediately for better UX,
-        // but we still update its state.
         return current.map(p => p.id === partnerId ? { ...p, featured: newState } : p);
       }
       return current.map(p => {

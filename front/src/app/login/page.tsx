@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveToken } from '@/lib/auth'
 
@@ -8,9 +8,15 @@ export default function LoginPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (!mounted) return;
     setError(null)
     setLoading(true)
 
@@ -42,7 +48,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <form onSubmit={handleSubmit} noValidate className="w-full max-w-sm space-y-4 rounded-2xl">
+      <form onSubmit={handleSubmit} method="POST" noValidate className="w-full max-w-sm space-y-4 rounded-2xl">
         <h1 className="text-center text-2xl font-bold font-title text-primary">Carte Pro</h1>
         <p className="text-center text-sm text-primary">Connectez-vous à votre espace</p>
 
@@ -54,7 +60,7 @@ export default function LoginPage() {
 
         {error && <p className="text-center text-sm text-red-600">{error}</p>}
 
-        <button type="submit" disabled={loading}
+        <button type="submit" disabled={loading || !mounted}
           className="w-full rounded-lg bg-action py-2 text-sm font-semibold text-white transition-colors hover:bg-action/90 disabled:opacity-50">
           {loading ? "Connexion..." : "Se connecter"}
         </button>

@@ -18,11 +18,15 @@ interface AdminUsersListProps {
   resourceType?: "user" | "partner";
 }
 
+import { io } from "socket.io-client";
+import { getUserId } from "@/lib/auth";
+
 export default function AdminUsersList({ resourceType }: AdminUsersListProps) {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [search, setSearch] = useState('');
   const [isVerified, setIsVerified] = useState('');
   const [loading, setLoading] = useState(false);
+  const [onlineUserIds, setOnlineUserIds] = useState<Set<number>>(new Set());
 
   const status = resourceType === "partner" ? "partenaire" : resourceType === "user" ? "user" : "";
 
@@ -53,6 +57,53 @@ export default function AdminUsersList({ resourceType }: AdminUsersListProps) {
 
     return () => clearTimeout(timer);
   }, [search, status, isVerified]);
+
+  useEffect(() => {
+    const adminUserId = getUserId();
+    if (!adminUserId) return;
+
+    const backendUrl = window.location.protocol + "//" + window.location.hostname + ":3000";
+    const socket = io(backendUrl, {
+      path: "/socket.io/",
+      query: { userId: adminUserId, isAdmin: "true" },
+      transports: ["websocket", "polling"],
+    });
+
+    socket.on("online_users", (data: { users: number[] }) => {
+      setOnlineUserIds(new Set(data.users));
+    });
+
+    socket.on("user_connected", (data: { userId: number }) => {
+      setOnlineUserIds(prev => {
+        const newSet = new Set(prev);
+        newSet.add(data.userId);
+        return newSet;
+      });
+    });
+
+    socket.on("user_disconnected", (data: { userId: number }) => {
+      setOnlineUserIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(data.userId);
+        return newSet;
+      });
+    });
+
+    socket.on("new_user_registered", (newUser: UserItem) => {
+      setUsers(prev => {
+        const currentStatus = resourceType === "partner" ? "partenaire" : resourceType === "user" ? "user" : "";
+        if (currentStatus && newUser.status !== currentStatus) {
+          return prev;
+        }
+        if (prev.some(u => u.id === newUser.id)) return prev;
+        return [newUser, ...prev];
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [resourceType]);
 
   return (
     <div className="space-y-4">
@@ -95,7 +146,14 @@ export default function AdminUsersList({ resourceType }: AdminUsersListProps) {
               users.map((u) => (
                 <tr key={u.id} className="hover:bg-zinc-50">
                   <td className="px-4 py-2 font-mono text-xs text-zinc-500">{u.id}</td>
-                  <td className="px-4 py-2 font-medium text-zinc-800">{u.name}</td>
+                  <td className="px-4 py-2 font-medium text-zinc-800 flex items-center gap-2">
+                    {onlineUserIds.has(u.id) ? (
+                      <span className="h-2 w-2 rounded-full bg-green-500" title="En ligne" />
+                    ) : (
+                      <span className="h-2 w-2 rounded-full bg-zinc-300" title="Hors ligne" />
+                    )}
+                    {u.name}
+                  </td>
                   <td className="px-4 py-2 text-zinc-600">{u.email}</td>
                   <td className="px-4 py-2">
                     <span className="rounded bg-zinc-100 px-2 py-0.5 text-xs font-semibold uppercase text-zinc-700">

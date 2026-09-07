@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation'
 export default function SignupPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [statut, setStatut] = useState('')
 
-  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
   event.preventDefault()
 
   setError(null)
+  setLoading(true)
 
   const formData = new FormData(event.currentTarget)
 
@@ -42,23 +44,29 @@ export default function SignupPage() {
     }
   }
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  })
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
 
-  if (response.ok) {
-    router.push('/after_signup')
-  } else {
-    const data = await response.json().catch(() => null)
-    setError(
-      Array.isArray(data?.message)
-        ? data.message.join(' ')
-        : data?.message ?? "Erreur lors de l'inscription"
-    )
+    if (response.ok) {
+      router.push('/after_signup')
+    } else {
+      const data = await response.json().catch(() => null)
+      setError(
+        Array.isArray(data?.message)
+          ? data.message.join(' ')
+          : data?.message ?? "Erreur lors de l'inscription"
+      )
+    }
+  } catch (err) {
+    setError("Erreur inattendue")
+  } finally {
+    setLoading(false)
   }
 }
 
@@ -119,9 +127,9 @@ export default function SignupPage() {
 
         {error && <p className="text-center text-sm text-red-600">{error}</p>}
 
-        <button type="submit"
-          className="w-full rounded-lg bg-action py-2 text-sm font-semibold text-white transition-colors hover:bg-action/90">
-          Créer mon compte
+        <button type="submit" disabled={loading}
+          className="w-full rounded-lg bg-action py-2 text-sm font-semibold text-white transition-colors hover:bg-action/90 disabled:opacity-50">
+          {loading ? 'Création en cours...' : 'Créer mon compte'}
         </button>
       </form>
     </div>
