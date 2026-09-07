@@ -13,9 +13,6 @@ export default function AdminDashboardPage() {
                         
                         {/* Ligne 1 : Coup de coeurs */}
                         <div className="relative flex justify-center">
-                            <span className="hidden md:block absolute left-8 top-1/2 -translate-y-1/2 text-sm font-semibold uppercase text-zinc-400">
-                                Coeurs<br />design
-                            </span>
                             <Link
                                 href="/admin/minister-choice"
                                 className="flex w-full md:w-2/3 items-center justify-center rounded-[32px] md:rounded-[40px] border-2 border-zinc-200 bg-white py-8 md:py-12 text-center font-title text-2xl md:text-4xl font-bold uppercase text-primary shadow-sm transition-transform hover:scale-105 hover:bg-zinc-100"
