@@ -33,7 +33,7 @@ export default function Header() {
                 <div className="flex items-center gap-4 sm:gap-8">
                     <Link href="/main" className="flex items-center gap-3 sm:gap-6">
                         <Image
-                            src="/bloc_marque_etat.jpeg"
+                            src="/favicon.png"
                             alt="République française"
                             width={80}
                             height={30}
