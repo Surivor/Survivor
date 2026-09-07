@@ -29,5 +29,6 @@ import { NotificationsModule } from '../notification/notification.module';
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService],
+  exports: [TransactionsService],
 })
 export class TransactionsModule {}

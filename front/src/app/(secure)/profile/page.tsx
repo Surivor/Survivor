@@ -13,6 +13,7 @@ type UserProfile = {
   firstname: string;
   email: string;
   status: string;
+  siren_entreprise: number;
 };
 
 export default function ProfilePage() {
@@ -137,6 +138,9 @@ export default function ProfilePage() {
             <p><span className="font-semibold">Prénom :</span> {user.firstname}</p>
             <p><span className="font-semibold">Email :</span> {user.email}</p>
             <p><span className="font-semibold">Statut :</span> {user.status}</p>
+            {user.siren_entreprise !== undefined && (
+              <p><span className="font-semibold">SIREN :</span> {user.siren_entreprise}</p>
+            )}
           </div>
 
           <BalanceCard balance={balance} />

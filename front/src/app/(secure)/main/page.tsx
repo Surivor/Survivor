@@ -29,6 +29,16 @@ export default function MainPage() {
         const token = getToken();
         if (!token) return;
 
+        import("@/lib/auth").then(({ getUserRole }) => {
+            const role = getUserRole();
+            if (role === 'entreprise-SIRH') {
+                import("next/navigation").then(({ useRouter }) => {
+                    window.location.href = '/enterprise-dashboard';
+                });
+                return;
+            }
+        });
+
         const fetchDashboardData = async () => {
             const headers = { Authorization: `Bearer ${token}` };
 

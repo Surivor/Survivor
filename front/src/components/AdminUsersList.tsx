@@ -15,7 +15,7 @@ interface UserItem {
 }
 
 interface AdminUsersListProps {
-  resourceType?: "user" | "partner";
+  resourceType?: "user" | "partner" | "enterprise";
 }
 
 import { io } from "socket.io-client";
@@ -28,7 +28,7 @@ export default function AdminUsersList({ resourceType }: AdminUsersListProps) {
   const [loading, setLoading] = useState(false);
   const [onlineUserIds, setOnlineUserIds] = useState<Set<number>>(new Set());
 
-  const status = resourceType === "partner" ? "partenaire" : resourceType === "user" ? "user" : "";
+  const status = resourceType === "partner" ? "partenaire" : resourceType === "user" ? "user" : resourceType === "enterprise" ? "entreprise-SIRH" : "";
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -91,7 +91,7 @@ export default function AdminUsersList({ resourceType }: AdminUsersListProps) {
 
     socket.on("new_user_registered", (newUser: UserItem) => {
       setUsers(prev => {
-        const currentStatus = resourceType === "partner" ? "partenaire" : resourceType === "user" ? "user" : "";
+        const currentStatus = resourceType === "partner" ? "partenaire" : resourceType === "user" ? "user" : resourceType === "enterprise" ? "entreprise-SIRH" : "";
         if (currentStatus && newUser.status !== currentStatus) {
           return prev;
         }
@@ -162,7 +162,7 @@ export default function AdminUsersList({ resourceType }: AdminUsersListProps) {
                   </td>
                   <td className="px-4 py-2 text-right">
                     <Link
-                      href={`/admin/${u.status === 'partenaire' ? 'partners' : 'users'}/${u.id}`}
+                      href={`/admin/${u.status === 'partenaire' ? 'partners' : u.status === 'entreprise-SIRH' ? 'enterprises' : 'users'}/${u.id}`}
                       className="inline-block rounded-xl bg-action px-4 py-2 text-xs font-semibold text-white hover:bg-action/90 transition"
                     >
                       Gérer
