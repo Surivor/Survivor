@@ -15,7 +15,8 @@ type Partner = {
 export default function Partener_main({ partners }: { partners?: Partner[] }) {
     const list = partners ?? [];
     const [searchQuery, setSearchQuery] = useState("");
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const partnersPerPage = 10;
     const filteredPartners = list.filter(partner => {
         const name = partner.user?.name?.toLowerCase() || "";
         const objetSocial = partner.objet_social?.toLowerCase() || "";
@@ -24,6 +25,12 @@ export default function Partener_main({ partners }: { partners?: Partner[] }) {
         
         return name.includes(query) || objetSocial.includes(query) || siren.includes(query);
     });
+    const totalPages = Math.ceil(filteredPartners.length / partnersPerPage);
+    const startIndex = (currentPage - 1) * partnersPerPage;
+    const currentPartners = filteredPartners.slice(
+        startIndex,
+        startIndex + partnersPerPage
+    );
 
     return (
         <div className="w-full max-w-4xl rounded-[28px] bg-white border border-gray-100 shadow-sm p-6">
@@ -52,7 +59,7 @@ export default function Partener_main({ partners }: { partners?: Partner[] }) {
                 {filteredPartners.length === 0 && (
                     <p className="text-gray-400 text-sm py-8 text-center">Aucun partenaire ne correspond à votre recherche.</p>
                 )}
-                {filteredPartners.map((p) => (
+                {currentPartners.map((p) => (
                     <div key={p.id} className="flex flex-col sm:flex-row sm:items-center justify-between py-5 gap-2 hover:bg-zinc-50 transition-colors px-2 rounded-xl">
                         <div>
                             <p className="text-primary font-bold text-lg">{p.user?.name || "Partenaire"}</p>
@@ -66,6 +73,31 @@ export default function Partener_main({ partners }: { partners?: Partner[] }) {
                     </div>
                 ))}
             </div>
+            {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-6">
+                <button
+                    onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 rounded-full border border-zinc-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                    Précédent
+                </button>
+                    
+                <span className="text-sm text-zinc-600">
+                    Page {currentPage} / {totalPages}
+                </span>
+                    
+                <button
+                    onClick={() =>
+                        setCurrentPage((page) => Math.min(page + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 rounded-full border border-zinc-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                    Suivant
+                </button>
+            </div>
+        )}
         </div>
     );
 }
