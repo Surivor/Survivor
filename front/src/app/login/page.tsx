@@ -60,7 +60,7 @@ export default function LoginPage() {
 
         {error && <p className="text-center text-sm text-red-600">{error}</p>}
 
-        <button type="submit" disabled={loading || !mounted}
+        <button type="submit" disabled={loading}
           className="w-full rounded-lg bg-action py-2 text-sm font-semibold text-white transition-colors hover:bg-action/90 disabled:opacity-50">
           {loading ? "Connexion..." : "Se connecter"}
         </button>

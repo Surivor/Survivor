@@ -29,6 +29,16 @@ export default function MainPage() {
         const token = getToken();
         if (!token) return;
 
+        import("@/lib/auth").then(({ getUserRole }) => {
+            const role = getUserRole();
+            if (role === 'entreprise-SIRH') {
+                import("next/navigation").then(({ useRouter }) => {
+                    window.location.href = '/enterprise-dashboard';
+                });
+                return;
+            }
+        });
+
         const fetchDashboardData = async () => {
             const headers = { Authorization: `Bearer ${token}` };
 
@@ -71,14 +81,12 @@ export default function MainPage() {
     }, []);
 
     useEffect(() => {
-        const userId = getUserId();
-        if (!userId) return;
+        const token = getToken();
+        if (!token) return;
 
-        const backendUrl = window.location.protocol + "//" + window.location.hostname + ":3000";
-        const socket = io(backendUrl, {
-            path: "/socket.io/",
-            query: { userId },
-            transports: ["websocket", "polling"],
+        const socket = io(window.location.origin, {
+          path: "/socket.io/",
+          auth: {token,},
         });
 
         socket.on("balance_update", (data) => {

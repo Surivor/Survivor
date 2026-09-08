@@ -27,18 +27,24 @@ export default function AdminDashboardPage() {
                                 Gestion
                             </h2>
                             
-                            <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-24 md:px-8">
+                            <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-12 md:px-8">
                                 <Link
                                     href="/admin/users"
-                                    className="flex w-full md:w-1/2 items-center justify-center rounded-[24px] md:rounded-[28px] border-2 border-zinc-200 bg-zinc-50 py-6 md:py-8 text-center font-title text-xl md:text-2xl font-bold uppercase text-primary transition-transform hover:scale-105 hover:bg-zinc-100 hover:shadow-md"
+                                    className="flex w-full md:w-1/3 items-center justify-center rounded-[24px] md:rounded-[28px] border-2 border-zinc-200 bg-zinc-50 py-6 md:py-8 text-center font-title text-xl md:text-2xl font-bold uppercase text-primary transition-transform hover:scale-105 hover:bg-zinc-100 hover:shadow-md"
                                 >
                                     User
                                 </Link>
                                 <Link
                                     href="/admin/partners"
-                                    className="flex w-full md:w-1/2 items-center justify-center rounded-[24px] md:rounded-[28px] border-2 border-zinc-200 bg-zinc-50 py-6 md:py-8 text-center font-title text-xl md:text-2xl font-bold uppercase text-primary transition-transform hover:scale-105 hover:bg-zinc-100 hover:shadow-md"
+                                    className="flex w-full md:w-1/3 items-center justify-center rounded-[24px] md:rounded-[28px] border-2 border-zinc-200 bg-zinc-50 py-6 md:py-8 text-center font-title text-xl md:text-2xl font-bold uppercase text-primary transition-transform hover:scale-105 hover:bg-zinc-100 hover:shadow-md"
                                 >
                                     Partner
+                                </Link>
+                                <Link
+                                    href="/admin/enterprises"
+                                    className="flex w-full md:w-1/3 items-center justify-center rounded-[24px] md:rounded-[28px] border-2 border-zinc-200 bg-zinc-50 py-6 md:py-8 text-center font-title text-xl md:text-2xl font-bold uppercase text-primary transition-transform hover:scale-105 hover:bg-zinc-100 hover:shadow-md"
+                                >
+                                    SIRH
                                 </Link>
                             </div>
                         </div>

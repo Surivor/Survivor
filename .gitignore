@@ -47,3 +47,7 @@ database.test.sqlite
 #postamn variable
 .postman
 postman
+
+#nginx proxy manager
+npm/data/
+npm/letsencrypt/

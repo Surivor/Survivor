@@ -121,10 +121,12 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: { id: id },
       select: {
+        id: true,
         name: true,
         firstname: true,
         email: true,
         status: true,
+        siren_entreprise: true,
       }
     });
 

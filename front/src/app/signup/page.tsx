@@ -34,6 +34,19 @@ export default function SignupPage() {
       siren: Number(formData.get('siren')),
       objet_social: formData.get('businessPurpose'),
     }
+  } else if (statut === 'entreprise-SIRH') {
+    url = '/api/enterprises'
+
+    body = {
+      userdto: {
+        name: formData.get('companyName'),
+        firstname: formData.get('prenom'),
+        status: 'entreprise-SIRH',
+        email: formData.get('email'),
+        password: formData.get('password'),
+      },
+      siren: Number(formData.get('siren')),
+    }
   } else {
     body = {
       name: formData.get('nom'),
@@ -41,6 +54,7 @@ export default function SignupPage() {
       status: 'user',
       email: formData.get('email'),
       password: formData.get('password'),
+      siren_entreprise: Number(formData.get('siren')),
     }
   }
 
@@ -95,20 +109,26 @@ export default function SignupPage() {
           <option value="" disabled>Choisissez un statut</option>
           <option value="user">Salarié</option>
           <option value="partenaire">Partenaire</option>
+          <option value="entreprise-SIRH">Entreprise-SIRH</option>
         </select>
 
-        {statut === 'partenaire' && (
+        {(statut === 'partenaire' || statut === 'entreprise-SIRH') && (
           <>
             <input type="text" name="companyName" placeholder="Nom de l'entreprise" required
               className="w-full rounded-lg border border-zinc-500 px-4 py-2 text-sm outline-none focus:border-action focus:ring-1 focus:ring-action" />
 
-            <input type="text" name="businessPurpose" placeholder="Objet social" required
-              className="w-full rounded-lg border border-zinc-500 px-4 py-2 text-sm outline-none focus:border-action focus:ring-1 focus:ring-action" />
+            {statut === 'partenaire' && (
+              <input type="text" name="businessPurpose" placeholder="Objet social" required
+                className="w-full rounded-lg border border-zinc-500 px-4 py-2 text-sm outline-none focus:border-action focus:ring-1 focus:ring-action" />
+            )}
+          </>
+        )}
 
+        {statut !== '' && (
             <input
               type="text"
               name="siren"
-              placeholder="SIREN (9 chiffres)"
+              placeholder={statut === 'partenaire' ? "SIREN (9 chiffres)" : "SIREN de votre employeur (9 chiffres)"}
               required
               inputMode="numeric"
               pattern="[0-9]{9}"
@@ -116,7 +136,6 @@ export default function SignupPage() {
               maxLength={9}
               className="w-full rounded-lg border border-zinc-500 px-4 py-2 text-sm outline-none focus:border-action focus:ring-1 focus:ring-action"
             />
-          </>
         )}
 
         <input type="email" name="email" placeholder="Email" required

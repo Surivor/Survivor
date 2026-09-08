@@ -22,7 +22,7 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (res.status === 401) {
+        if (!res.ok) {
           removeToken();
           router.push("/login");
           return;

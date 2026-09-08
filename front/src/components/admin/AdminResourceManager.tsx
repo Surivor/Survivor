@@ -4,11 +4,11 @@ import Header from "@/components/Header";
 import AdminUsersList from "@/components/AdminUsersList";
 
 type Props = {
-    resourceType: "user" | "partner";
+    resourceType: "user" | "partner" | "enterprise";
 };
 
 export default function AdminResourceManager({ resourceType }: Props) {
-    const title = resourceType === "user" ? "Gestion des Utilisateurs" : "Gestion des Partenaires";
+    const title = resourceType === "user" ? "Gestion des Utilisateurs" : resourceType === "partner" ? "Gestion des Partenaires" : "Gestion des Entreprises SIRH";
 
     return (
         <div className="flex min-h-screen flex-col bg-zinc-50">
