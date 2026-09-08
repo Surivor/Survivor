@@ -16,12 +16,9 @@ const config: Config = {
   testRegex: '.*\\.spec\\.ts$',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.(t|j)s$': ['ts-jest', { useESM: true }],
+    '^.+\\.(t|j)s$': 'ts-jest',
   },
-  moduleNameMapper: {
-    ...pathsToModuleNameMapper(paths, { prefix: '<rootDir>/' }),
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
+  moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>/' }),
   collectCoverageFrom: [
     'src/**/*.(t|j)s',
     'libs/**/*.(t|j)s',
@@ -29,6 +26,8 @@ const config: Config = {
   ],
   coverageDirectory: './coverage',
   testEnvironment: 'node',
+  modulePaths: ["<rootDir>"],
+  moduleDirectories: ["node_modules", "src"],
 };
 
 export default config;

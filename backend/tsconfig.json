@@ -17,7 +17,7 @@
     "incremental": true,
     "skipLibCheck": true,
     "strict": true,
-    "rootDir": ".",
+    "rootDir": "./src",
     "strictPropertyInitialization": false
   }
 }
