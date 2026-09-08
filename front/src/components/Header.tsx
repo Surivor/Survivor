@@ -8,12 +8,11 @@ import { getUserRole } from "@/lib/auth";
 export default function Header() {
     const [isPartner, setIsPartner] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isEnterprise, setIsEnterprise] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         const role = getUserRole();
-        
-        console.log("Rôle extrait du token :", role);
 
         if (role && typeof role === 'string') {
             const lowerRole = role.toLowerCase();
@@ -22,6 +21,9 @@ export default function Header() {
             }
             if (lowerRole === "admin" || lowerRole === "administrateur") {
                 setIsAdmin(true);
+            }
+            if (lowerRole === "entreprise-sirh") {
+                setIsEnterprise(true);
             }
         } 
     }, []);
@@ -33,7 +35,7 @@ export default function Header() {
                 <div className="flex items-center gap-4 sm:gap-8">
                     <Link href="/main" className="flex items-center gap-3 sm:gap-6">
                         <Image
-                            src="/bloc_marque_etat.jpeg"
+                            src="/favicon.png"
                             alt="République française"
                             width={80}
                             height={30}
@@ -41,23 +43,33 @@ export default function Header() {
                             style={{ width: "auto", height: "auto" }}
                         />
                         <div className="hidden sm:block h-6 w-[1px] bg-zinc-300" />
-                        <h3 className="text-lg sm:text-xl font-bold font-title text-primary">Ticket Tout</h3>
+                        <h3 className="text-lg sm:text-xl font-bold font-title text-primary">Carte Pro</h3>
                     </Link>
 
                     <nav className="hidden lg:flex items-center gap-6 pl-6 border-l border-zinc-200">
-                        <Link href="/main" className="text-zinc-600 hover:text-primary font-medium transition-colors">
-                            Accueil
-                        </Link>
-                        <Link href="/history" className="text-zinc-600 hover:text-primary font-medium transition-colors">
-                            Historique
-                        </Link>
-                        <Link href="/partner" className="text-zinc-600 hover:text-primary font-medium transition-colors">
-                            Partenaires
-                        </Link>
+                        {!isEnterprise && (
+                            <>
+                                <Link href="/main" className="text-zinc-600 hover:text-primary font-medium transition-colors">
+                                    Accueil
+                                </Link>
+                                <Link href="/history" className="text-zinc-600 hover:text-primary font-medium transition-colors">
+                                    Historique
+                                </Link>
+                                <Link href="/partner" className="text-zinc-600 hover:text-primary font-medium transition-colors">
+                                    Partenaires
+                                </Link>
+                            </>
+                        )}
                         
                         {isPartner && (
                             <Link href="/partner-dashboard" className="text-zinc-600 hover:text-primary font-medium transition-colors">
                                 Espace partenaire
+                            </Link>
+                        )}
+                        
+                        {isEnterprise && (
+                            <Link href="/enterprise-dashboard" className="text-zinc-600 hover:text-primary font-medium transition-colors">
+                                Espace SIRH
                             </Link>
                         )}
                         
@@ -91,19 +103,29 @@ export default function Header() {
 
             {isMenuOpen && (
                 <nav className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-zinc-200 shadow-md flex flex-col py-4 px-6 gap-4">
-                    <Link href="/main" onClick={() => setIsMenuOpen(false)} className="text-zinc-600 hover:text-primary font-medium transition-colors block">
-                        Accueil
-                    </Link>
-                    <Link href="/history" onClick={() => setIsMenuOpen(false)} className="text-zinc-600 hover:text-primary font-medium transition-colors block">
-                        Historique
-                    </Link>
-                    <Link href="/partner" onClick={() => setIsMenuOpen(false)} className="text-zinc-600 hover:text-primary font-medium transition-colors block">
-                        Partenaires
-                    </Link>
+                    {!isEnterprise && (
+                        <>
+                            <Link href="/main" onClick={() => setIsMenuOpen(false)} className="text-zinc-600 hover:text-primary font-medium transition-colors block">
+                                Accueil
+                            </Link>
+                            <Link href="/history" onClick={() => setIsMenuOpen(false)} className="text-zinc-600 hover:text-primary font-medium transition-colors block">
+                                Historique
+                            </Link>
+                            <Link href="/partner" onClick={() => setIsMenuOpen(false)} className="text-zinc-600 hover:text-primary font-medium transition-colors block">
+                                Partenaires
+                            </Link>
+                        </>
+                    )}
                     
                     {isPartner && (
                         <Link href="/partner-dashboard" onClick={() => setIsMenuOpen(false)} className="text-zinc-600 hover:text-primary font-medium transition-colors block">
                             Espace partenaire
+                        </Link>
+                    )}
+
+                    {isEnterprise && (
+                        <Link href="/enterprise-dashboard" onClick={() => setIsMenuOpen(false)} className="text-zinc-600 hover:text-primary font-medium transition-colors block">
+                            Espace SIRH
                         </Link>
                     )}
                     

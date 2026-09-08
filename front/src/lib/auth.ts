@@ -1,4 +1,4 @@
-const TOKEN_KEY = "Ticket_tout_token";
+const TOKEN_KEY = "Carte-Pro_token";
 
 export function saveToken(token: string) {
   localStorage.setItem(TOKEN_KEY, token);
@@ -43,6 +43,19 @@ export function getUserRole(): string | null {
   try {
     const payload = decodeJwtPayload(token);
     return payload?.status || null;
+  } catch (e) {
+    console.error("Erreur de décodage du token", e);
+    return null;
+  }
+}
+
+export function getUserId(): number | null {
+  const token = getToken();
+  if (!token) return null;
+
+  try {
+    const payload = decodeJwtPayload(token);
+    return payload?.sub || null;
   } catch (e) {
     console.error("Erreur de décodage du token", e);
     return null;

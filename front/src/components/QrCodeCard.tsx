@@ -94,7 +94,7 @@ export default function QrCodeCard() {
             
             <p className="mt-6 text-center text-sm text-zinc-600 font-body">
               Présentez ce code au partenaire. <br/>
-              <span className="text-xs text-gray-400">Valable 30 minutes.</span>
+              <span className="text-xs text-gray-400">Valable 5 minutes.</span>
             </p>
           </div>
         </div>

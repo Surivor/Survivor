@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, removeToken } from "@/lib/auth";
+import { getToken, removeToken, getUserId } from "@/lib/auth";
+import { io } from "socket.io-client";
 import BalanceCard from "@/components/BalanceCard";
 import Header from "@/components/Header";
 
@@ -12,6 +13,7 @@ type UserProfile = {
   firstname: string;
   email: string;
   status: string;
+  siren_entreprise: number;
 };
 
 export default function ProfilePage() {
@@ -77,6 +79,29 @@ export default function ProfilePage() {
     loadProfile();
   }, [router]);
 
+  useEffect(() => {
+  const token = getToken();
+
+  if (!token) return;
+
+  const socket = io(window.location.origin, {
+    path: "/socket.io/",
+    auth: {
+      token,
+    },
+  });
+
+  socket.on("balance_update", (data) => {
+    if (data && typeof data.newBalance === "number") {
+      setBalance(data.newBalance);
+    }
+  });
+
+  return () => {
+    socket.disconnect();
+  };
+}, []);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50">
@@ -114,6 +139,9 @@ export default function ProfilePage() {
             <p><span className="font-semibold">Prénom :</span> {user.firstname}</p>
             <p><span className="font-semibold">Email :</span> {user.email}</p>
             <p><span className="font-semibold">Statut :</span> {user.status}</p>
+            {user.siren_entreprise !== undefined && (
+              <p><span className="font-semibold">SIREN :</span> {user.siren_entreprise}</p>
+            )}
           </div>
 
           <BalanceCard balance={balance} />

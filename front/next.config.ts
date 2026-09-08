@@ -12,6 +12,10 @@ const nextConfig = {
         source: '/api/:path*',
         destination: 'http://backend:3000/api/:path*',
       },
+      {
+        source: '/socket.io/:path*',
+        destination: 'http://backend:3000/socket.io/:path*',
+      },
     ];
   },
 };

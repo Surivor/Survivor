@@ -5,11 +5,14 @@ import { AppService, PartnersInitService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
 import { Partner } from './partners/partner.entity';
+import { Enterprise } from './enterprises/enterprise.entity';
 import { AuthModule } from './auth/auth.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { PartnersModule } from './partners/partners.module';
 import { HealthController } from './health/health.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EnterprisesModule } from './enterprises/enterprises.module';
+import { SirhModule } from './sirh/sirh.module';
 
 @Module({
   imports: [
@@ -28,16 +31,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: configService.get<string>('DB_USER', 'root'),
         password: configService.get<string>('DB_PASSWORD', 'root'),
         database: configService.get<string>('DB_NAME', 'survivor'),
-        entities: [User, Partner],
+        entities: [User, Partner, Enterprise],
         autoLoadEntities: true,
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([User, Partner]),
+    TypeOrmModule.forFeature([User, Partner, Enterprise]),
     UsersModule,
     AuthModule,
     TransactionsModule,
     PartnersModule,
+    EnterprisesModule,
+    SirhModule,
+    SirhModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
