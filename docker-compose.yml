@@ -10,6 +10,8 @@ services:
       - "443:443"
     environment:
       TZ: Europe/Paris
+      INITIAL_ADMIN_EMAIL:  ${NPM_ADMIN_EMAIL}
+      INITIAL_ADMIN_PASSWORD: ${NPM_ADMIN_PASSWORD}
     volumes:
       - ./npm/data:/data
       - ./npm/letsencrypt:/etc/letsencrypt
