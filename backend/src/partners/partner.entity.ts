@@ -25,6 +25,9 @@ export class Partner {
     @Column({ type: 'timestamp', nullable: true })
     unfeaturedAt?: Date | null;
 
+    @Column({ default: '' })
+    region: string;
+
     @OneToOne(() => User)
     @JoinColumn({ name: 'id' })
     user: User;
