@@ -70,35 +70,21 @@ services:
 
     restart: unless-stopped
 
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: survivor-cloudflared
-
-    command:
-      - tunnel
-      - --no-autoupdate
-      - --url
-      - http://proxy:80
-
-    depends_on:
-      - proxy
-
-    networks:
-      - survivor
-
-    restart: unless-stopped
-
   proxy:
     image: nginx:alpine
     container_name: survivor-proxy
 
+    ports:
+      - 80:80
+      - 443:443
     depends_on:
       - frontend
       - backend
 
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./cartepro.local.pem:/etc/nginx/cartepro.local.pem:ro
+      - ./cartepro.local-key.pem:/etc/nginx/cartepro.local-key.pem:ro
 
     networks:
       - survivor
