@@ -79,11 +79,26 @@ services:
       - tunnel
       - --no-autoupdate
       - --url
-      - http://frontend:3001
+      - http://proxy:80
 
     depends_on:
-      frontend:
-        condition: service_started
+      - proxy
+
+    networks:
+      - survivor
+
+    restart: unless-stopped
+
+  proxy:
+    image: nginx:alpine
+    container_name: survivor-proxy
+
+    depends_on:
+      - frontend
+      - backend
+
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
 
     networks:
       - survivor
