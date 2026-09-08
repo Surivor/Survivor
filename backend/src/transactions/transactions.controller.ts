@@ -86,19 +86,6 @@ export class TransactionsController {
     return this.transactionsService.getAllAdmin();
   }
 
-  @Post('admin/fund')
-  async fundAccount(
-    @Body('userId') userId: number,
-    @Body('amount') amount: number,
-    @Headers('x-api-key') apiKey: string,
-  ) {
-    if (!apiKey || apiKey !== process.env.PASS_ADD) {
-      throw new UnauthorizedException("Clé API invalide ou manquante");
-    }
-
-    return this.transactionsService.addFunds(userId, amount);
-  }
-
   @Get('transactions.csv')
   getTransactionsCsv(@Res() res: Response) {
     const file = fs.readFileSync('transactions.csv', 'utf8');
