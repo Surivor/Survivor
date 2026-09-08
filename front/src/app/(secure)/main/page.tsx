@@ -84,11 +84,9 @@ export default function MainPage() {
         const token = getToken();
         if (!token) return;
 
-        const backendUrl = window.location.protocol + "//" + window.location.hostname + ":3000";
-        const socket = io(backendUrl, {
-            path: "/socket.io/",
-            auth: { token },
-            transports: ["websocket", "polling"],
+        const socket = io(window.location.origin, {
+          path: "/socket.io/",
+          auth: {token,},
         });
 
         socket.on("balance_update", (data) => {

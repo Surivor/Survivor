@@ -80,26 +80,27 @@ export default function ProfilePage() {
   }, [router]);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) return;
+  const token = getToken();
 
-    const backendUrl = window.location.protocol + "//" + window.location.hostname + ":3000";
-    const socket = io(backendUrl, {
-      path: "/socket.io/",
-      auth: { token },
-      transports: ["websocket", "polling"],
-    });
+  if (!token) return;
 
-    socket.on("balance_update", (data) => {
-      if (data && typeof data.newBalance === "number") {
-        setBalance(data.newBalance);
-      }
-    });
+  const socket = io(window.location.origin, {
+    path: "/socket.io/",
+    auth: {
+      token,
+    },
+  });
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  socket.on("balance_update", (data) => {
+    if (data && typeof data.newBalance === "number") {
+      setBalance(data.newBalance);
+    }
+  });
+
+  return () => {
+    socket.disconnect();
+  };
+}, []);
 
   if (loading) {
     return (
