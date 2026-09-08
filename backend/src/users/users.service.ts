@@ -89,6 +89,7 @@ export class UsersService {
       firstname: firstname ? firstname.trim() : name.trim(),
       status: status || 'active',
       siren_entreprise: siren_entreprise,
+      isVerified: status === 'user',
     });
 
     try {
