@@ -305,6 +305,7 @@ export class TransactionsService {
       partner: t.partner ? {
         id: t.partner.id,
         name: t.partner.user?.name || 'Partenaire Inconnu',
+        region: t.partner.region,
       } : null,
     }));
   }

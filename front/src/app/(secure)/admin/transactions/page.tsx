@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/auth";
 import Header from "@/components/Header";
@@ -20,12 +20,14 @@ interface Transaction {
     partner: {
         id: number;
         name: string;
+        region: string;
     } | null;
 }
 
 export default function AdminTransactionsPage() {
     const router = useRouter();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
+    
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -72,12 +74,60 @@ export default function AdminTransactionsPage() {
         }).format(date);
     };
 
+    const topPartners = useMemo(() => {
+    const totals = new Map<number, { id: number; name: string; total: number }>();
+
+    for (const t of transactions) {
+      if (t.type === "debit" && t.partner) {
+        const amount = Number(t.amount);
+        const existing = totals.get(t.partner.id);
+        if (existing) {
+          existing.total += amount;
+        } else {
+          totals.set(t.partner.id, { id: t.partner.id, name: t.partner.name, total: amount });
+        }
+      }
+    }
+    return Array.from(totals.values())
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5);
+    }, [transactions]);
+
+    const maxTotal = topPartners.length > 0 ? topPartners[0].total : 0;
+
+    const geographicDistribution = useMemo(() => {
+
+        const uniquePartners = new Map<number, string>();
+
+        for (const transaction of transactions) {
+            if (transaction.partner) {
+                uniquePartners.set(
+                    transaction.partner.id,
+                    transaction.partner.region || "Non renseignée"
+                );
+            }
+        }
+
+        const distribution: Record<string, number> = {};
+
+        for (const region of uniquePartners.values()) {
+            distribution[region] = (distribution[region] || 0) + 1;
+        }
+
+        return Object.entries(distribution)
+            .sort((a, b) => b[1] - a[1]);
+    }, [transactions]);
+
+    const maxRegionCount =
+        geographicDistribution.length > 0
+            ? geographicDistribution[0][1]
+            : 0;
+
     return (
         <div className="flex min-h-screen flex-col bg-zinc-50">
             <Header />
             <main className="flex flex-1 flex-col items-center px-4 md:px-8 py-8 md:py-12">
                 <div className="w-full max-w-6xl space-y-6 md:space-y-8">
-                    
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                         <Link href="/admin" className="text-zinc-500 hover:text-primary">
                             ← Retour
@@ -86,7 +136,64 @@ export default function AdminTransactionsPage() {
                             Toutes les Transactions
                         </h1>
                     </div>
+                    {!loading && !error && (topPartners.length > 0 || geographicDistribution.length > 0) && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full">
+                            {geographicDistribution.length > 0 && (
+                                <div className="rounded-[24px] md:rounded-[32px] border-2 border-zinc-200 bg-white p-4 md:p-8 shadow-sm">
+                                    <h2 className="font-title text-lg md:text-xl font-bold text-primary mb-6">
+                                        Répartition géographique
+                                    </h2>
+                                    <div className="space-y-4">
+                                        {geographicDistribution.map(([region, count]) => {
+                                            const widthPercent = maxRegionCount > 0 ? (count / maxRegionCount) * 100 : 0;
+                                            return (
+                                                <div key={region} className="flex items-center gap-4">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="text-sm font-semibold text-zinc-900">{region}</span>
+                                                            <span className="text-sm font-semibold text-action">
+                                                                {count} partenaire{count > 1 ? "s" : ""}
+                                                            </span>
+                                                        </div>
+                                                        <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100">
+                                                            <div className="h-full rounded-full bg-action transition-all" style={{ width: `${widthPercent}%` }} />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
 
+                            {topPartners.length > 0 && (
+                                <div className="rounded-[24px] md:rounded-[32px] border-2 border-zinc-200 bg-white p-4 md:p-8 shadow-sm">
+                                    <h2 className="font-title text-lg md:text-xl font-bold text-primary mb-6">
+                                        Partenaires les plus populaires
+                                    </h2>
+                                    <div className="space-y-4">
+                                        {topPartners.map((partner, index) => {
+                                            const widthPercent = maxTotal > 0 ? (partner.total / maxTotal) * 100 : 0;
+                                            return (
+                                                <div key={partner.id} className="flex items-center gap-4">
+                                                    <span className="w-6 text-sm font-semibold text-zinc-400">#{index + 1}</span>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="text-sm font-semibold text-zinc-900">{partner.name}</span>
+                                                            <span className="text-sm font-semibold text-action">{partner.total.toFixed(2)} €</span>
+                                                        </div>
+                                                        <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100">
+                                                            <div className="h-full rounded-full bg-action transition-all" style={{ width: `${widthPercent}%` }} />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                     <div className="rounded-[24px] md:rounded-[32px] border-2 border-zinc-200 bg-white p-4 md:p-8 shadow-sm flex flex-col gap-6">
                         {loading ? (
                             <p className="text-zinc-500 text-center py-8">Chargement des transactions...</p>

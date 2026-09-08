@@ -1,4 +1,3 @@
-//create partner (changes all fields), maybe allow creation of user through creation of partner
 import { IsString, IsNotEmpty, ValidateNested, IsBoolean, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateUserDto } from "../../users/dto/create-user.dto";
@@ -43,5 +42,13 @@ export class CreatePartnerDto {
     @IsBoolean()
     @IsOptional()
     featured: boolean;
+
+    @ApiPropertyOptional({
+        example: 'Île-de-France',
+        description: 'The region of the partner'
+    })
+    @IsString()
+    @IsOptional()
+    region: string;
 }
 
