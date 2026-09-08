@@ -1,4 +1,3 @@
-//create partner (changes all fields), maybe allow creation of user through creation of partner
 import { IsString, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
 import { UpdateUserDto } from "../../users/dto/update-user.dto";
 import { ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
@@ -33,5 +32,13 @@ export class UpdatePartnerDto {
     @IsBoolean()
     @IsOptional()
     featured: boolean;
+
+    @ApiPropertyOptional({
+        example: 'Île-de-France',
+        description: 'The region of the partner'
+    })
+    @IsString()
+    @IsOptional()
+    region: string;
 }
 

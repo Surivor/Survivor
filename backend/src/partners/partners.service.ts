@@ -19,6 +19,7 @@ export class PartnersService {
         siren: true,
         objet_social: true,
         verified: true,
+		region: true,
         featured: true,
         featuredAt: true,
         unfeaturedAt: true,
@@ -109,6 +110,7 @@ export class PartnersService {
 	    objet_social: partnerData.objet_social,
 	    verified: partnerData.verified,
 	    featured: partnerData.featured,
+	    region: partnerData.region || '',
 	})
 
 	try {

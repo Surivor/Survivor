@@ -46,8 +46,8 @@ async function bootstrap() {
       { name: 'Glaces Artisanales Corrèze', siren: 190003334, objet_social: 'Glacier en ligne', region: 'Nouvelle-Aquitaine', category: 'Restauration' },
       { name: 'Chapelier Fontaine', siren: 310004445, objet_social: 'Vente de chapeaux en feutre', region: 'Occitanie', category: 'Boutique' },
       { name: 'Le Bilig de Saint-Malo', siren: 350005556, objet_social: 'Crêperie traditionnelle', region: 'Bretagne', category: 'Restauration' },
-      { name: 'Librairie des Capucins', siren: 330006667, objet_social: 'Librairie indépendante', region: 'Nouvelle-Aquitaine', category: 'Culture' },
-      { name: 'Théâtre de l\'Éphémère', siren: 750007778, objet_social: 'Salle de spectacle', region: 'IDF', category: 'Culture' },
+      { name: 'Librairie des Capucins', siren: 330006667, objet_social: 'Librairie indépendante', region: 'Bretagne', category: 'Culture' },
+      { name: 'Théâtre de l\'Éphémère', siren: 750007778, objet_social: 'Salle de spectacle', region: 'Bretagne', category: 'Culture' },
       { name: 'Kayak & Co', siren: 290008889, objet_social: 'Location de canoës', region: 'Bretagne', category: 'Loisirs' },
       { name: 'L\'Atelier du Cuir', siren: 310009990, objet_social: 'Maroquinerie artisanale', region: 'Occitanie', category: 'Boutique' },
       { name: 'Cinéma Le Méliès', siren: 340001112, objet_social: 'Cinéma d\'art et d\'essai', region: 'Occitanie', category: 'Culture' },
@@ -100,6 +100,7 @@ async function bootstrap() {
         siren: p.siren,
         objet_social: p.objet_social,
         verified: true,
+        region: p.region,
       });
       await partnerRepository.save(partner);
       savedPartners.push(savedUser);

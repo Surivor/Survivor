@@ -14,6 +14,7 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
     const [partnerData, setPartnerData] = useState<any>(null);
     const [pageLoading, setPageLoading] = useState(true);
     const [fetchError, setFetchError] = useState<string | null>(null);
+    const [regionInput, setRegionInput] = useState("");
 
     useEffect(() => {
         const fetchPartner = async () => {
@@ -36,6 +37,7 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
 
                 const data = await res.json();
                 setPartnerData(data);
+                setRegionInput(data.region || "");
             } catch (err: any) {
                 setFetchError(err.message);
             } finally {
@@ -145,6 +147,37 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
         }
     };
 
+    const handleUpdateRegion = async () => {
+        setLoading(true);
+        setMessage(null);
+        try {
+            const token = getToken();
+            const res = await fetch(`/api/partners/${id}`, {
+                method: "PATCH",
+                headers: { 
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}` 
+                },
+                body: JSON.stringify({
+                    region: regionInput,
+                    objet_social: partnerData.objet_social || "N/A",
+                })
+            });
+
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error(err || "Erreur lors de la mise à jour de la région");
+            }
+            
+            setMessage("Région mise à jour avec succès.");
+            setPartnerData({ ...partnerData, region: regionInput });
+        } catch (error: any) {
+            setMessage(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="flex min-h-screen flex-col bg-zinc-50">
             <Header />
@@ -188,7 +221,26 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
                                         </>
                                     )}
                                     
-                                    <div className="font-semibold">Statut du compte :</div>
+                                    <div className="font-semibold mt-2 sm:mt-0">Région :</div>
+                                    <div className="flex items-center gap-2 mb-2 sm:mb-0">
+                                        <input
+                                            type="text"
+                                            value={regionInput}
+                                            onChange={(e) => setRegionInput(e.target.value)}
+                                            placeholder="Ex: Île-de-France"
+                                            className="w-full max-w-[200px] rounded border border-zinc-300 px-2 py-1 text-sm outline-none focus:border-action"
+                                            disabled={loading}
+                                        />
+                                        <button 
+                                            onClick={handleUpdateRegion}
+                                            disabled={loading || regionInput === (partnerData.region || "")}
+                                            className="rounded bg-zinc-800 px-3 py-1 text-xs font-semibold text-white hover:bg-zinc-700 transition disabled:opacity-50"
+                                        >
+                                            Enregistrer
+                                        </button>
+                                    </div>
+
+                                    <div className="font-semibold mt-2 sm:mt-0">Statut du compte :</div>
                                     <div>
                                         <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${
                                             isVerified ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
