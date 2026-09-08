@@ -1,15 +1,12 @@
 services:
   db:
     image: mysql:8.0
-    #container_name: survivor-db
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: survivor
       MYSQL_USER: survivor
       MYSQL_PASSWORD: survivor
       MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3306:3306"
     networks:
       - survivor
     volumes:
@@ -21,62 +18,83 @@ services:
       retries: 10
       start_period: 20s
 
+
   backend:
     image: survivor-backend:latest
+
     build:
       context: ./backend
       dockerfile: Dockerfile
-    #container_name: survivor-backend
+
     depends_on:
       db:
         condition: service_healthy
+
     env_file:
-    - .env
-    ports:
-      - "3000:3000"
+      - .env
+
     networks:
       - survivor
+
     environment:
       NODE_ENV: production
       PORT: 3000
-      WATCHPACK_POLLING: "true"
       API_URL: http://backend:3000
+
       DB_HOST: db
       DB_PORT: 3306
       DB_NAME: survivor
       DB_USER: survivor
       DB_PASSWORD: survivor
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    command: npm run start:dev
+
     restart: unless-stopped
+
 
   frontend:
     image: survivor-frontend:latest
+
     build:
       context: ./front
       dockerfile: Dockerfile
-    #container_name: survivor-frontend
-    ports:
-      - "3001:3001"
+
+    depends_on:
+      - backend
+
     networks:
       - survivor
-    depends_on:
-    - backend
+
     environment:
       API_URL: http://backend:3000
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3001
-      WATCHPACK_POLLING: "true"
-    volumes:
-      - ./front:/app
-      - /app/node_modules
-    command: npm run dev
+
     restart: unless-stopped
+
+  proxy:
+    image: nginx:alpine
+    container_name: survivor-proxy
+
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - frontend
+      - backend
+
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./cartepro.local.pem:/etc/nginx/cartepro.local.pem:ro
+      - ./cartepro.local-key.pem:/etc/nginx/cartepro.local-key.pem:ro
+
+    networks:
+      - survivor
+
+    restart: unless-stopped
+
 
 volumes:
   mysql_data:
+
 
 networks:
   survivor:

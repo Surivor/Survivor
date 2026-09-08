@@ -86,6 +86,17 @@ export class TransactionsController {
     return this.transactionsService.getAllAdmin();
   }
 
+  @ApiOperation({ summary: 'Credit user balance (Admin only)' })
+  @ApiResponse({ status: 201, description: 'User balance successfully credited.' })
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Post('admin/credit')
+  async creditUser(@Body() body: { userId: number; amount: number }) {
+    if (!body.userId || typeof body.amount !== 'number') {
+      throw new BadRequestException('userId et amount sont requis et valides');
+    }
+    return this.transactionsService.addFunds(body.userId, body.amount);
+  }
+
   @Get('transactions.csv')
   getTransactionsCsv(@Res() res: Response) {
     const file = fs.readFileSync('transactions.csv', 'utf8');
