@@ -1,24 +1,5 @@
 services:
 
-  nginx-proxy-manager:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "81:81"
-      - "443:443"
-    environment:
-      TZ: Europe/Paris
-      INITIAL_ADMIN_EMAIL:  ${NPM_ADMIN_EMAIL}
-      INITIAL_ADMIN_PASSWORD: ${NPM_ADMIN_PASSWORD}
-    volumes:
-      - ./npm/data:/data
-      - ./npm/letsencrypt:/etc/letsencrypt
-
-    networks:
-      - survivor
-
   db:
     image: mysql:8.0
     #container_name: survivor-db
@@ -93,6 +74,16 @@ services:
       - ./front:/app
       - /app/node_modules
     command: npm run dev
+    restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: survivor-cloudflared
+    command: tunnel --no-autoupdate --url http://frontend:3001
+    depends_on:
+      - frontend
+    networks:
+      - survivor
     restart: unless-stopped
 
 volumes:
