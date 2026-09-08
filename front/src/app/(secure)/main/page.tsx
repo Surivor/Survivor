@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getToken } from "@/lib/auth";
+import { getToken, getUserId } from "@/lib/auth";
+import { io } from "socket.io-client";
 import BalanceCard from "@/components/BalanceCard";
 import QrCodeCard from "@/components/QrCodeCard";
 import Header from "@/components/Header";
@@ -27,6 +28,16 @@ export default function MainPage() {
     useEffect(() => {
         const token = getToken();
         if (!token) return;
+
+        import("@/lib/auth").then(({ getUserRole }) => {
+            const role = getUserRole();
+            if (role === 'entreprise-SIRH') {
+                import("next/navigation").then(({ useRouter }) => {
+                    window.location.href = '/enterprise-dashboard';
+                });
+                return;
+            }
+        });
 
         const fetchDashboardData = async () => {
             const headers = { Authorization: `Bearer ${token}` };
@@ -67,6 +78,29 @@ export default function MainPage() {
         };
 
         fetchDashboardData();
+    }, []);
+
+    useEffect(() => {
+        const token = getToken();
+        if (!token) return;
+
+        const socket = io(window.location.origin, {
+          path: "/socket.io/",
+          auth: {token,},
+        });
+
+        socket.on("balance_update", (data) => {
+            if (data && typeof data.newBalance === "number") {
+                setBalance(data.newBalance);
+            }
+            if (data && data.transaction) {
+                setTransactions((prev) => [data.transaction, ...prev]);
+            }
+        });
+
+        return () => {
+            socket.disconnect();
+        };
     }, []);
 
     const featuredPartner = partners.find(p => p.featured === true);

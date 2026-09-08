@@ -37,9 +37,9 @@ export class CreateUserDto {
   @ApiPropertyOptional({
   example: 'user',
   description: 'The type of user account',
-  enum: ['user', 'partenaire'],
+  enum: ['user', 'partenaire', 'entreprise-SIRH'],
 })
-  @IsIn(['user', 'partenaire'])
+  @IsIn(['user', 'partenaire', 'entreprise-SIRH'])
   status: string;
 
   @ApiPropertyOptional({

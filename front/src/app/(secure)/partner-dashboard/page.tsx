@@ -149,9 +149,9 @@ export default function PartnerDashboardPage() {
     <>
       <Header />
       <div className="flex min-h-screen flex-col items-center gap-8 bg-zinc-50 px-4 pt-8">
-        <SimulationBanner />
 
         <div className="w-full max-w-2xl flex flex-col gap-6">
+        <SimulationBanner />
 
           {/* Encaisser un paiement */}
           <div className="rounded-2xl bg-white border border-zinc-100 shadow-sm p-6 space-y-4">

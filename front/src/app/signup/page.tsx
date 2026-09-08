@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation'
 export default function SignupPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [statut, setStatut] = useState('')
 
-  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
   event.preventDefault()
 
   setError(null)
+  setLoading(true)
 
   const formData = new FormData(event.currentTarget)
 
@@ -32,6 +34,19 @@ export default function SignupPage() {
       siren: Number(formData.get('siren')),
       objet_social: formData.get('businessPurpose'),
     }
+  } else if (statut === 'entreprise-SIRH') {
+    url = '/api/enterprises'
+
+    body = {
+      userdto: {
+        name: formData.get('companyName'),
+        firstname: formData.get('prenom'),
+        status: 'entreprise-SIRH',
+        email: formData.get('email'),
+        password: formData.get('password'),
+      },
+      siren: Number(formData.get('siren')),
+    }
   } else {
     body = {
       name: formData.get('nom'),
@@ -39,26 +54,33 @@ export default function SignupPage() {
       status: 'user',
       email: formData.get('email'),
       password: formData.get('password'),
+      siren_entreprise: Number(formData.get('siren')),
     }
   }
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  })
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
 
-  if (response.ok) {
-    router.push('/after_signup')
-  } else {
-    const data = await response.json().catch(() => null)
-    setError(
-      Array.isArray(data?.message)
-        ? data.message.join(' ')
-        : data?.message ?? "Erreur lors de l'inscription"
-    )
+    if (response.ok) {
+      router.push('/after_signup')
+    } else {
+      const data = await response.json().catch(() => null)
+      setError(
+        Array.isArray(data?.message)
+          ? data.message.join(' ')
+          : data?.message ?? "Erreur lors de l'inscription"
+      )
+    }
+  } catch (err) {
+    setError("Erreur inattendue")
+  } finally {
+    setLoading(false)
   }
 }
 
@@ -87,20 +109,26 @@ export default function SignupPage() {
           <option value="" disabled>Choisissez un statut</option>
           <option value="user">Salarié</option>
           <option value="partenaire">Partenaire</option>
+          <option value="entreprise-SIRH">Entreprise-SIRH</option>
         </select>
 
-        {statut === 'partenaire' && (
+        {(statut === 'partenaire' || statut === 'entreprise-SIRH') && (
           <>
             <input type="text" name="companyName" placeholder="Nom de l'entreprise" required
               className="w-full rounded-lg border border-zinc-500 px-4 py-2 text-sm outline-none focus:border-action focus:ring-1 focus:ring-action" />
 
-            <input type="text" name="businessPurpose" placeholder="Objet social" required
-              className="w-full rounded-lg border border-zinc-500 px-4 py-2 text-sm outline-none focus:border-action focus:ring-1 focus:ring-action" />
+            {statut === 'partenaire' && (
+              <input type="text" name="businessPurpose" placeholder="Objet social" required
+                className="w-full rounded-lg border border-zinc-500 px-4 py-2 text-sm outline-none focus:border-action focus:ring-1 focus:ring-action" />
+            )}
+          </>
+        )}
 
+        {statut !== '' && (
             <input
               type="text"
               name="siren"
-              placeholder="SIREN (9 chiffres)"
+              placeholder={statut === 'partenaire' ? "SIREN (9 chiffres)" : "SIREN de votre employeur (9 chiffres)"}
               required
               inputMode="numeric"
               pattern="[0-9]{9}"
@@ -108,7 +136,6 @@ export default function SignupPage() {
               maxLength={9}
               className="w-full rounded-lg border border-zinc-500 px-4 py-2 text-sm outline-none focus:border-action focus:ring-1 focus:ring-action"
             />
-          </>
         )}
 
         <input type="email" name="email" placeholder="Email" required
@@ -119,9 +146,9 @@ export default function SignupPage() {
 
         {error && <p className="text-center text-sm text-red-600">{error}</p>}
 
-        <button type="submit"
-          className="w-full rounded-lg bg-action py-2 text-sm font-semibold text-white transition-colors hover:bg-action/90">
-          Créer mon compte
+        <button type="submit" disabled={loading}
+          className="w-full rounded-lg bg-action py-2 text-sm font-semibold text-white transition-colors hover:bg-action/90 disabled:opacity-50">
+          {loading ? 'Création en cours...' : 'Créer mon compte'}
         </button>
       </form>
     </div>

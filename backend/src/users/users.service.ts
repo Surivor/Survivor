@@ -6,11 +6,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 
+import { NotificationsService } from '../notification/notification.service';
+
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async findAllAdmin(search?: string, status?: string, isVerified?: string): Promise<User[]> {
@@ -88,7 +91,16 @@ export class UsersService {
       siren_entreprise: siren_entreprise,
     });
 
-    await this.usersRepository.save(newUser);
+    try {
+      await this.usersRepository.save(newUser);
+      
+      this.notificationsService.sendNewUserRegistered(newUser);
+    } catch (error: any) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new ConflictException(`L'adresse email ${email} est déjà utilisée.`);
+      }
+      throw error;
+    }
 
     return newUser; 
   }
@@ -109,10 +121,12 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: { id: id },
       select: {
+        id: true,
         name: true,
         firstname: true,
         email: true,
         status: true,
+        siren_entreprise: true,
       }
     });
 
