@@ -1,0 +1,62 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Project cartePro {
+  database_type: 'MySQL'
+  Note: 'cartePro db diagram'
+}
+
+Table users {
+  id number [primary key, not null]
+  name string [not null]
+  email string [not null, unique]
+  password string [default: '']
+  firstname string [default: '']
+  balance_initial number [default: 300]
+  status string [default: 'active']
+  isAdmin boolean [default: false]
+  isVerified boolean [default: false]
+  siren_entreprise number [default: 0]
+  createdAt Date
+}
+
+//partners technically are users with additional info
+Table partners {
+  id number [not null]
+  siren number [not null, unique]
+  objet_social string [not null]
+  verified boolean [default: false]
+  featured boolean [default: false]
+  featuredAt date
+  unfeaturedAt date
+  region string [default: '']
+}
+//partner table link
+Ref: users.id < partners.id
+
+
+//enterprise technically are users with additional info
+Table enterprises {
+  id number [not null]
+  siren number [not null, unique]
+  apiKey string [default: '']
+}
+//enterprise table link
+Ref: users.id < enterprises.id
+
+
+//transaction table
+Table transactions {
+  id number [primary key, not null]
+  userId number
+  partnerId number
+  type TransactionType
+  amount number
+  idempotencyKey string [unique]
+  qrJti string [unique]
+  createdAt timestamp
+}
+//transaction table links
+Ref: users.id ?< transactions.userId
+Ref: users.id ?< transactions.partnerId
+
