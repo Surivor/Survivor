@@ -11,23 +11,50 @@ export default function QrCodeCard() {
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const QR_STORAGE_KEY = "cartepro_qr";
+  const getCachedQr = () => {
+    const cached = localStorage.getItem(QR_STORAGE_KEY);
+    if (!cached)
+        return null;
+    const parsed = JSON.parse(cached);
+    if (Date.now() >= parsed.expiresAt) {
+      localStorage.removeItem(QR_STORAGE_KEY);
+      return null;
+    }
+    return parsed.token;
+  };
 
   const handleOpenPopup = async () => {
     setIsOpen(true);
     setLoading(true);
-    
+
     try {
       const token = getToken();
       const res = await fetch("api/transactions/qrcode", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      if (res.ok) {
-        const textToken = await res.json();
-        setQrToken(textToken.code); 
+
+      if (!res.ok) {
+        throw new Error("QR generation failed");
       }
+      const textToken = await res.json();
+      setQrToken(textToken.code);
+      localStorage.setItem(
+        QR_STORAGE_KEY,
+        JSON.stringify({
+          token: textToken.code,
+          expiresAt: Date.now() + 5 * 60 * 1000,
+        })
+      );
     } catch (e) {
-      console.error("Erreur API:", e);
+      console.error("Error:", e);
+      const cachedQr = getCachedQr();
+
+      if (cachedQr) {
+        setQrToken(cachedQr);
+      } else {
+        setQrToken(null);
+      }
     } finally {
       setLoading(false);
     }
