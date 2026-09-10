@@ -22,8 +22,12 @@ async function bootstrap() {
 
     await dataSource.query('SET FOREIGN_KEY_CHECKS = 1;');
 
-    const adminEmail = process.env.ADMIN_EMAIL || 'ministre@survivor.com';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'SuperAdminPassword123!';
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    
+    if (!adminEmail || !adminPassword) {
+      throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD are required');
+    }
     const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
 
     const hashedDefaultPassword = await bcrypt.hash('securepassword', 10);
