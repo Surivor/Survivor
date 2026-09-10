@@ -22,7 +22,7 @@ import { NotificationsModule } from '../notification/notification.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
               global: true,
-              secret: configService.get<string>('JWT_SECRET_TRANSACTION', 'DONT/ASK8FORTHEKEY!!!'),
+              secret: configService.getOrThrow<string>('JWT_SECRET_TRANSACTION'),
               signOptions: { expiresIn: '1d' },
         }),
     }),

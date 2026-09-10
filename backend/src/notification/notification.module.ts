@@ -10,7 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET', 'DONT/ASK8FORTHEKEY!!!'),
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
       }),
     }),
   ],
